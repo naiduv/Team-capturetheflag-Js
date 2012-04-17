@@ -22,30 +22,25 @@ soldier = function(x, y){
 	this.xloc = x;
 	this.yloc = y;
 
-	this.walkloc = 1;
+	this.ywalkloc = 1;
+
+	this.ywalkcycle = [	"soldier_walking_1", 
+						"soldier_walking_2",
+						"soldier_walking_3"];
 }
 
 soldier.prototype = {
 	draw : function(){
-		ctx.drawImage(document.getElementById("soldier_walking_1"),_this.xloc,_this.yloc,30,34);
+		ctx.drawImage(document.getElementById(_this.ywalkcycle[0]),_this.xloc,_this.yloc,30,34);
 	},
 
 	moveup : function(){
 		ctx.fillStyle="#FFFFFF";
 		ctx.fillRect(0,0,500,500);
-		if(_this.walkloc==1){
-			ctx.drawImage(document.getElementById("soldier_walking_2"),_this.xloc,_this.yloc,30,34);
-			_this.yloc-=3;
-			_this.walkloc = 2;
-		} else if (_this.walkloc==2) {
-			ctx.drawImage(document.getElementById("soldier_walking_3"),_this.xloc,_this.yloc,30,34);
-			_this.yloc-=3;
-			_this.walkloc = 3;
-		}  else if (_this.walkloc==3) {
-			ctx.drawImage(document.getElementById("soldier_walking_1"),_this.xloc,_this.yloc,30,34);
-			_this.yloc-=3;
-			_this.walkloc = 1;
-		}
+		ctx.drawImage(document.getElementById(_this.ywalkcycle[_this.ywalkloc-1]),_this.xloc,_this.yloc,30,34);
+		if(this.ywalkloc==3) this.ywalkloc=0;
+		_this.ywalkloc++;
+		_this.yloc-=5;
 	},
 }
 
