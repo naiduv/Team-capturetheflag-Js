@@ -42,6 +42,15 @@ soldier.prototype = {
 		_this.ywalkloc++;
 		_this.yloc-=5;
 	},
+
+	movedown : function(){
+		ctx.fillStyle="#FFFFFF";
+		ctx.fillRect(0,0,500,500);
+		ctx.drawImage(document.getElementById(_this.ywalkcycle[_this.ywalkloc-1]),_this.xloc,_this.yloc,30,34);
+		if(this.ywalkloc==1) this.ywalkloc=4;
+		_this.ywalkloc--;
+		_this.yloc+=5;
+	},
 }
 
 window.onkeypress = function(e){
@@ -53,6 +62,10 @@ window.onkeypress = function(e){
 		case "w":
 			ls = timer.getlonesoldier();
 			ls.moveup();
+			break;
+		case "s":
+			ls = timer.getlonesoldier();
+			ls.movedown();
 			break;
 	}
 }
