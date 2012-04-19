@@ -27,10 +27,10 @@ soldier = function(x, y){
 	this.yloc = y;
 
 	this.ywalkloc = 1;
-
 	this.ywalkcycle = [	"soldier_walking_1", 
 						"soldier_walking_2",
 						"soldier_walking_3"];
+	_this.firing = false;
 	_this = this;
 }
 
@@ -38,15 +38,20 @@ var increment = 3;
 
 soldier.prototype = {
 	draw : function(){
-		console.log(_this.xloc);
-		console.log("draw lookangle"+_this.lookangle);
-		ctx.fillStyle="#FFFFFF";
-		ctx.fillRect(_this.xloc-10,_this.yloc-10,50,50);
+		// ctx.fillStyle="#FFFFFF";
+		// ctx.fillRect(_this.xloc-10,_this.yloc-10,60,60);
 		ctx.save(); // save current state
 		ctx.translate(_this.xloc, _this.yloc);
 		ctx.translate(15,17);
     	ctx.rotate(_this.lookangle*Math.PI/180); // rotate
-		ctx.drawImage(document.getElementById(_this.ywalkcycle[0]),-15,-17,30,34);
+    	ctx.fillStyle="#FFFFFF";
+		ctx.arc(0,0,40,0,2*Math.PI,false);
+		ctx.fill();
+		if(_this.firing) {
+    		ctx.drawImage(document.getElementById("gunfire"),-4,-28,15,12);
+    		_this.firing = false;
+    	}
+		ctx.drawImage(document.getElementById(_this.ywalkcycle[_this.ywalkloc]),-15,-17,30,34);
 		ctx.restore();
 	},
 
@@ -65,6 +70,11 @@ soldier.prototype = {
 		_this.yloc += increment*Math.cos(_this.lookangle*Math.PI/180);	
 		_this.draw();
 	},
+
+	fire: function(){
+		_this.firing = true;
+		_this.draw();	
+	}
 }
 
 window.onkeypress = function(e){
@@ -82,6 +92,11 @@ window.onkeypress = function(e){
 			ls.movedown();
 			break;
 	}
+}
+
+window.onmousedown = function(e){
+	ls = timer.getlonesoldier();
+	ls.fire();
 }
 
 window.onmousemove = function(e){
