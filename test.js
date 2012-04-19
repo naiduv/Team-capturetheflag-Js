@@ -1,4 +1,6 @@
 //this is your timer, does nothing right now
+var ls;
+
 Timer = function() { 
 	this.intervalid = 0;
 	_this = this;
@@ -17,7 +19,9 @@ var soldier_count = 0;
 var timer;
 
 soldier = function(x, y){
-	_this = this;
+	this.lookx= 0;
+	this.looky = 0;
+	this.lookangle = 0;
 	//this.element = elem;
 	this.xloc = x;
 	this.yloc = y;
@@ -27,29 +31,39 @@ soldier = function(x, y){
 	this.ywalkcycle = [	"soldier_walking_1", 
 						"soldier_walking_2",
 						"soldier_walking_3"];
+	_this = this;
 }
+
+var increment = 3;
 
 soldier.prototype = {
 	draw : function(){
-		ctx.drawImage(document.getElementById(_this.ywalkcycle[0]),_this.xloc,_this.yloc,30,34);
+		console.log(_this.xloc);
+		console.log("draw lookangle"+_this.lookangle);
+		ctx.fillStyle="#FFFFFF";
+		ctx.fillRect(_this.xloc-10,_this.yloc-10,50,50);
+		ctx.save(); // save current state
+		ctx.translate(_this.xloc, _this.yloc);
+		ctx.translate(15,17);
+    	ctx.rotate(_this.lookangle*Math.PI/180); // rotate
+		ctx.drawImage(document.getElementById(_this.ywalkcycle[0]),-15,-17,30,34);
+		ctx.restore();
 	},
 
 	moveup : function(){
 		ctx.fillStyle="#FFFFFF";
-		ctx.fillRect(0,0,500,500);
-		ctx.drawImage(document.getElementById(_this.ywalkcycle[_this.ywalkloc-1]),_this.xloc,_this.yloc,30,34);
-		if(this.ywalkloc==3) this.ywalkloc=0;
-		_this.ywalkloc++;
-		_this.yloc-=5;
+		ctx.fillRect(_this.xloc,_this.yloc,50,50);
+		_this.xloc += increment*Math.sin(_this.lookangle*Math.PI/180);
+		_this.yloc -= increment*Math.cos(_this.lookangle*Math.PI/180);
+		_this.draw();
 	},
 
 	movedown : function(){
 		ctx.fillStyle="#FFFFFF";
-		ctx.fillRect(0,0,500,500);
-		ctx.drawImage(document.getElementById(_this.ywalkcycle[_this.ywalkloc-1]),_this.xloc,_this.yloc,30,34);
-		if(this.ywalkloc==1) this.ywalkloc=4;
-		_this.ywalkloc--;
-		_this.yloc+=5;
+		ctx.fillRect(_this.xloc,_this.yloc-15,50,50);
+		_this.xloc -= increment*Math.sin(_this.lookangle*Math.PI/180);
+		_this.yloc += increment*Math.cos(_this.lookangle*Math.PI/180);	
+		_this.draw();
 	},
 }
 
@@ -68,6 +82,23 @@ window.onkeypress = function(e){
 			ls.movedown();
 			break;
 	}
+}
+
+window.onmousemove = function(e){
+	ls = timer.getlonesoldier();
+	ls.lookx = e.pageX;
+	ls.looky = e.pageY;
+
+	disty = ls.yloc - ls.looky;
+	distx = ls.xloc - ls.lookx;
+	hyp = Math.sqrt(disty*disty + distx*distx);
+	ls.lookangle =Math.atan2(disty,distx) * 180/Math.PI; 
+	if (ls.lookangle < 0) ls.lookangle += 360;
+	ls.lookangle -=90;
+
+	// this.lookangle = this.lookangle*Math.PI/180;
+
+	ls.draw();
 }
 
 Timer.prototype = {
