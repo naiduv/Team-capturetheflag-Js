@@ -1,12 +1,6 @@
 //this is your timer, does nothing right now
 var ls;
 
-Timer = function() { 
-	this.intervalid = 0;
-	_this = this;
-	this.lonesoldier;
-}
-
 //randomly returns a +1 or -1
 randfunc = function(){
 	if(Math.random()<0.5) 
@@ -36,7 +30,7 @@ soldier = function(x, y){
 	_this = this;
 }
 
-var increment = 3;
+var increment = 10;
 
 soldier.prototype = {
 	draw : function(){
@@ -51,23 +45,18 @@ soldier.prototype = {
 		ctx.fill();
 		if(_this.firing) {
     		ctx.drawImage(document.getElementById("gunfire"),-4,-28,15,12);
-    		_this.firing = false;
     	}
 		ctx.drawImage(document.getElementById(_this.ywalkcycle[_this.ywalkloc]),-15,-17,30,34);
 		ctx.restore();
 	},
 
 	moveup : function(){
-		ctx.fillStyle="#FFFFFF";
-		ctx.fillRect(_this.xloc,_this.yloc,50,50);
 		_this.xloc += increment*Math.sin(_this.lookangle*Math.PI/180);
 		_this.yloc -= increment*Math.cos(_this.lookangle*Math.PI/180);
 		_this.draw();
 	},
 
 	movedown : function(){
-		ctx.fillStyle="#FFFFFF";
-		ctx.fillRect(_this.xloc,_this.yloc-15,50,50);
 		_this.xloc -= increment*Math.sin(_this.lookangle*Math.PI/180);
 		_this.yloc += increment*Math.cos(_this.lookangle*Math.PI/180);	
 		_this.draw();
@@ -84,33 +73,43 @@ soldier.prototype = {
 		ctx.fillStyle="#FFFFFF";
 		ctx.fillRect(200,10,70,15);
 		ctx.strokeText("ammo left - "+_this.ammo, 200, 20);
+
+		//this is a hack to delete the gunfire image..
+		_this.firing = false;
 	}
 }
 
-window.onkeypress = function(e){
+window.onkeyup = function(e){
+	if(ls==undefined)
+		return;
+	
 	var evtobj=window.event? event : e;
 	var unicode=evtobj.charCode? evtobj.charCode : evtobj.keyCode;
 	var actualkey=String.fromCharCode(unicode);
 	
 	switch(actualkey) {
-		case "w":
-			ls = timer.getlonesoldier();
+		case "W":
 			ls.moveup();
 			break;
-		case "s":
-			ls = timer.getlonesoldier();
+		case "S":
 			ls.movedown();
 			break;
 	}
 }
 
 window.onmousedown = function(e){
-	ls = timer.getlonesoldier();
+	if(ls==undefined)
+		return;
+
 	ls.fire();
+	console.log("fire");
+	return;
 }
 
 window.onmousemove = function(e){
-	ls = timer.getlonesoldier();
+	if(ls==undefined)
+		return;
+	
 	ls.lookx = e.pageX;
 	ls.looky = e.pageY;
 
@@ -126,35 +125,6 @@ window.onmousemove = function(e){
 	ls.draw();
 }
 
-Timer.prototype = {
-	update: function() {
-	},
-
-	run: function() {
-		// document.onmousemove = updatemouseloc;
-		// document.onmousedown = setclicked;
-		//_this.update();
-
-		if(soldier_count==0) {
-			ctx.fillStyle="#FFFFFF";
-			ctx.fillRect(0,0,500,500);
-			lonesoldier = new soldier(200,200);
-			lonesoldier.draw();
-			soldier_count++;
-		}
-	},
-
-	getlonesoldier: function(){
-		return lonesoldier;
-	}
-}
-
-
-// function updatemouseloc(e) {
-// 	mousex = e.pageX;
-// 	mousey = e.pageY;
-// }
-
 //when the page loads init your vars and get the canvas and context
 window.onload = function() {
 	x = 100;
@@ -163,6 +133,11 @@ window.onload = function() {
 	c = document.getElementById("myCanvas");
 	ctx = c.getContext("2d");
 
-	timer = new Timer();
-	timer._intervalId = setInterval(timer.run, 10);
+	while(soldier_count<1) {
+		ctx.fillStyle="#FFFFFF";
+		ctx.fillRect(0,0,500,500);
+		ls = new soldier(200,200);
+		ls.draw();
+		soldier_count++;
+	}
 }
