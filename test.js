@@ -17,6 +17,7 @@ randfunc = function(){
 
 var soldier_count = 0;
 var timer;
+var ammo = 0;
 
 soldier = function(x, y){
 	this.lookx= 0;
@@ -30,7 +31,8 @@ soldier = function(x, y){
 	this.ywalkcycle = [	"soldier_walking_1", 
 						"soldier_walking_2",
 						"soldier_walking_3"];
-	_this.firing = false;
+	this.firing = false;
+	this.ammo = 10;
 	_this = this;
 }
 
@@ -72,8 +74,16 @@ soldier.prototype = {
 	},
 
 	fire: function(){
+		if(_this.ammo<=0)
+			return;
+
+		_this.ammo--;
 		_this.firing = true;
-		_this.draw();	
+		_this.draw();
+
+		ctx.fillStyle="#FFFFFF";
+		ctx.fillRect(200,10,70,15);
+		ctx.strokeText("ammo left - "+_this.ammo, 200, 20);
 	}
 }
 
