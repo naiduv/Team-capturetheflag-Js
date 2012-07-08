@@ -119,7 +119,13 @@ window.onmousedown = function(e){
 	return;
 }
 
-
+window.onresize = function()
+{
+  c = document.getElementById("myCanvas");
+  ctx = c.getContext("2d");
+  ctx.canvas.width  = window.innerWidth;
+  ctx.canvas.height = window.innerHeight;
+}
 
 window.onmousemove = function(e){
 	if(ls==undefined)
@@ -131,26 +137,20 @@ window.onmousemove = function(e){
 	disty = ls.loc.y - ls.looky;
 	distx = ls.loc.x - ls.lookx;
 	hyp = Math.sqrt(disty*disty + distx*distx);
+	
 	ls.lookangle =Math.atan2(disty,distx) * 180/Math.PI; 
 	if (ls.lookangle < 0) ls.lookangle += 360;
 	ls.lookangle -=90;
-
-	// this.lookangle = this.lookangle*Math.PI/180;
 
 	ls.draw();
 }
 
 //when the page loads init your vars and get the canvas and context
 window.onload = function() {
-	x = 100;
-	y = 100;
-
 	c = document.getElementById("myCanvas");
-	ctx = c.getContext("2d");
-
-	ctx.fillStyle=bkcolor;
-	ctx.fillRect(0,0,500,500);
-
+ 	ctx = c.getContext("2d");
+  	ctx.canvas.width  = window.innerWidth;
+  	ctx.canvas.height = window.innerHeight;
 	while(soldier_count<1) {
 		ls = new soldier(200-(soldier_count*100),200);
 		ls.draw();
