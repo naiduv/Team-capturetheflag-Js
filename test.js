@@ -88,12 +88,6 @@ soldier.prototype = {
 		this.firing = true;
 		this.draw();
 
-		//should go to draw dashboard
-		// ctx.font = "20pt Calibri";
-		// ctx.lineWidth = 1;
-		// ctx.strokeText("ammo left - "+this.ammo, 200, 20);
-
-
 		//this is a hack to delete the gunfire image..
 		this.firing = false;
 	}
@@ -158,9 +152,10 @@ window.onmousemove = function(e){
 	ls.draw();
 }
 
+var soldiers = [];
+
 //when the page loads init your vars and get the canvas and context
 window.onload = function() {
-	
 	c = document.getElementById("myCanvas");
  	ctx = c.getContext("2d");
   	ctx.canvas.width  = window.innerWidth;
@@ -168,12 +163,46 @@ window.onload = function() {
 
  	drawdashboard();
 
-	while(soldier_count<1) {
-		ls = new soldier(200-(soldier_count*100),200);
+	while(soldier_count<2) {
+		ls = new soldier(400-(soldier_count*100),400);
 		ls.draw();
+		soldiers.push(ls);
 		soldier_count++;
 	}
+
+	self.setInterval(function(){zombiesoldier();}, 70);
 }
+
+function zombiesoldier()
+{
+	console.log('zombiesoldier command');
+	num = Math.floor(Math.random()*10);
+	switch(num)
+	{	
+		case 0:
+		case 1:
+		case 2:
+		case 3:
+		case 4:
+		case 5:
+		case 6:
+		case 7:
+			soldiers[0].moveup();
+			break;
+		case 8:
+			soldiers[0].fire();
+			break;
+		case 9:
+			soldiers[0].lookangle += 20;
+			break;	
+		case 10:
+			soldiers[0].lookangle -= 20;
+			break;
+	}
+
+	console.log(num);
+}
+
 
 function drawdashboard()
 {
