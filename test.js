@@ -89,9 +89,9 @@ soldier.prototype = {
 		this.draw();
 
 		//should go to draw dashboard
-		ctx.font = "20pt Calibri";
-		ctx.lineWidth = 1;
-		ctx.strokeText("ammo left - "+this.ammo, 200, 20);
+		// ctx.font = "20pt Calibri";
+		// ctx.lineWidth = 1;
+		// ctx.strokeText("ammo left - "+this.ammo, 200, 20);
 
 
 		//this is a hack to delete the gunfire image..
