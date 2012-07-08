@@ -19,8 +19,8 @@ soldier = function(x, y){
 	this.lookx= 0;
 	this.looky = 0;
 	this.lookangle = 0;
-	this.w = 30;
-	this.h = 34;
+	this.w = 25;
+	this.h = 29;
 	//this.element = elem;
 	this.loc = new Point(x,y);
 	this.rect = new Rect(x-this.w/2,y+this.h/2,this.w,this.h); //scaled because of translation for rotation, see draw()
@@ -29,10 +29,10 @@ soldier = function(x, y){
 						"soldier_walking_2",
 						"soldier_walking_3"];
 	this.firing = false;
-	this.ammo = 10;
+	this.ammo = 100;
 }
 
-var increment = 10;
+var increment = 4;
 
 soldier.prototype = {
 	draw : function(movesoldier){
@@ -51,7 +51,7 @@ soldier.prototype = {
 		}
 
 		if(this.firing)
-    		ctx.drawImage(document.getElementById("gunfire"),-4,-28,this.w/2,this.h/2);
+    		ctx.drawImage(document.getElementById("gunfire"),-2,-24,this.w/3,this.h/3);
 
 			ctx.drawImage(document.getElementById(this.walkingimage(movesoldier)),
 				-this.w/2,-this.h/2,this.w,this.h);
@@ -88,9 +88,11 @@ soldier.prototype = {
 		this.firing = true;
 		this.draw();
 
-		ctx.fillStyle=bkcolor;
-		ctx.fillRect(200,10,70,15);
+		//should go to draw dashboard
+		ctx.font = "20pt Calibri";
+		ctx.lineWidth = 1;
 		ctx.strokeText("ammo left - "+this.ammo, 200, 20);
+
 
 		//this is a hack to delete the gunfire image..
 		this.firing = false;
@@ -164,7 +166,6 @@ window.onload = function() {
   	ctx.canvas.width  = window.innerWidth;
   	ctx.canvas.height = window.innerHeight;
 
- 	loadimages();
  	drawdashboard();
 
 	while(soldier_count<1) {
@@ -174,19 +175,6 @@ window.onload = function() {
 	}
 }
 
-var wasd_img;
-function loadimages()
-{
-	wasd_img = new Image();
-	wasd_img.src = "./images/dashboard/wasd.png";
-}
-
 function drawdashboard()
 {
-	if (!ctx) {
-		console.log('no ctx, cant draw dashboard')
-		return;
-	}
-
-	ctx.drawImage(wasd_img,10,20);
 }
