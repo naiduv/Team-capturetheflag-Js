@@ -35,7 +35,7 @@ soldier = function(x, y){
 var increment = 10;
 
 soldier.prototype = {
-	draw : function(){
+	draw : function(movesoldier){
 		// ctx.fillStyle="#FFFFFF";
 		// ctx.fillRect(this.loc.x-10,this.loc.y-10,60,60);
 		ctx.save(); // save current state
@@ -52,23 +52,32 @@ soldier.prototype = {
 
 		if(this.firing)
     		ctx.drawImage(document.getElementById("gunfire"),-4,-28,this.w/2,this.h/2);
-		
-		ctx.drawImage(document.getElementById(this.ywalkcycle[this.ywalkloc]),
-			-this.w/2,-this.h/2,this.w,this.h);
+
+			ctx.drawImage(document.getElementById(this.walkingimage(movesoldier)),
+				-this.w/2,-this.h/2,this.w,this.h);
 		
 		ctx.restore();
+	},
+
+	walkingimage: function(movesoldier){
+		if(movesoldier) {		
+			this.ywalkloc++;
+			if(this.ywalkloc==3)
+				this.ywalkloc=0;
+		}
+		return this.ywalkcycle[this.ywalkloc];
 	},
 
 	moveup : function(){
 		this.loc.x += increment*Math.sin(this.lookangle*Math.PI/180);
 		this.loc.y -= increment*Math.cos(this.lookangle*Math.PI/180);
-		this.draw();
+		this.draw(true);
 	},
 
 	movedown : function(){
 		this.loc.x -= increment*Math.sin(this.lookangle*Math.PI/180);
 		this.loc.y += increment*Math.cos(this.lookangle*Math.PI/180);	
-		this.draw();
+		this.draw(true);
 	},
 
 	fire: function(){
@@ -125,6 +134,8 @@ window.onresize = function()
   ctx = c.getContext("2d");
   ctx.canvas.width  = window.innerWidth;
   ctx.canvas.height = window.innerHeight;
+
+  drawdashboard();
 }
 
 window.onmousemove = function(e){
@@ -147,13 +158,35 @@ window.onmousemove = function(e){
 
 //when the page loads init your vars and get the canvas and context
 window.onload = function() {
+	
 	c = document.getElementById("myCanvas");
  	ctx = c.getContext("2d");
   	ctx.canvas.width  = window.innerWidth;
   	ctx.canvas.height = window.innerHeight;
+
+ 	loadimages();
+ 	drawdashboard();
+
 	while(soldier_count<1) {
 		ls = new soldier(200-(soldier_count*100),200);
 		ls.draw();
 		soldier_count++;
 	}
+}
+
+var wasd_img;
+function loadimages()
+{
+	wasd_img = new Image();
+	wasd_img.src = "./images/dashboard/wasd.png";
+}
+
+function drawdashboard()
+{
+	if (!ctx) {
+		console.log('no ctx, cant draw dashboard')
+		return;
+	}
+
+	ctx.drawImage(wasd_img,10,20);
 }
