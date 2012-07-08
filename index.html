@@ -5,19 +5,34 @@
 <style type="text/css">
 
 canvas{
-border:5px solid #000000;
-height:90%;
-width:90%;
-background:url(./images/maps/towers.png);
-background-repeat: no-repeat;
-background-attachment:fixed;
-background-position:left top;
+	position:absolute;
+	border:5px solid #000000;
+	top:5%;
+	left:5%;
+	height:90%;
+	width:90%;
+/*	background:url(./images/dashboard/wasd.png);
+	background-repeat: no-repeat;
+	background-attachment:fixed;
+	background-position:left top;*/
+	z-order:0;
 }
 
+#background
+{
+	position:absolute;
+	top:5%;
+	left:5%;
+	height:90%;
+	width:90%;
+	z-order:1;
+}
 </style>
 
 </head>
 <body>
+<!-- <img src="./images/maps/towers.png" id="background"></img>
+ -->
 <center><canvas id="myCanvas"></canvas></center>
 <img id="soldier_walking_1" src=".\images\soldier\walking\1.gif" style="visibility:hidden;height:0%;width:0%"></img>
 <img id="soldier_walking_2" src=".\images\soldier\walking\2.gif" style="visibility:hidden;height:0%;width:0%"></img>
