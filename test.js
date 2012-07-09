@@ -153,51 +153,57 @@ window.onmousemove = function(e){
 }
 
 var soldiers = [];
-
+var num_soldiers = 4;
+var canvas_w;
+var cavnvas_h;
 //when the page loads init your vars and get the canvas and context
 window.onload = function() {
 	c = document.getElementById("myCanvas");
  	ctx = c.getContext("2d");
-  	ctx.canvas.width  = window.innerWidth;
-  	ctx.canvas.height = window.innerHeight;
+  	canvas_w = ctx.canvas.width  = window.innerWidth;
+  	canvas_h = ctx.canvas.height = window.innerHeight;
 
  	drawdashboard();
 
-	while(soldier_count<2) {
-		ls = new soldier(400-(soldier_count*100),400);
+	while(soldier_count<num_soldiers) {
+		ls = new soldier(canvas_w-400-(soldier_count*50),canvas_h-100-(soldier_count*50));
 		ls.draw();
 		soldiers.push(ls);
 		soldier_count++;
 	}
 
-	self.setInterval(function(){zombiesoldier();}, 70);
+	self.setInterval(function(){zombiesoldier(2);}, 70);
 }
 
 function zombiesoldier()
 {
 	console.log('zombiesoldier command');
-	num = Math.floor(Math.random()*10);
-	switch(num)
-	{	
-		case 0:
-		case 1:
-		case 2:
-		case 3:
-		case 4:
-		case 5:
-		case 6:
-		case 7:
-			soldiers[0].moveup();
-			break;
-		case 8:
-			soldiers[0].fire();
-			break;
-		case 9:
-			soldiers[0].lookangle += 20;
-			break;	
-		case 10:
-			soldiers[0].lookangle -= 20;
-			break;
+	i = 0;
+	while(i<num_soldiers-1) {
+		num = Math.floor(Math.random()*11);
+		switch(num)
+		{	
+			case 0:
+			case 1:
+			case 2:
+			case 3:
+			case 4:
+			case 5:
+			case 6:
+			case 7:
+				soldiers[i].moveup();
+				break;
+			case 8:
+				soldiers[i].fire();
+				break;
+			case 9:
+				soldiers[i].lookangle += 20;
+				break;	
+			case 10:
+				soldiers[i].lookangle -= 20;
+				break;
+		}
+		i++;
 	}
 
 	console.log(num);
