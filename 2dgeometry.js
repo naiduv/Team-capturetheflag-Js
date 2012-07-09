@@ -40,3 +40,25 @@ ptinrect = function(pt, rect)
 		return true;
 	return false;
 }
+
+rectscollide = function(rect1, rect2)
+{	
+	// var top1 = rect1.y;
+	// var left1 = rect1.x;
+	// var bottom1 = rect1.y-rect1.h; //+ or -?
+	// var right1 = rect1.x+rect1.w;
+
+	// var top2 = rect2.y;
+	// var left2 = rect2.x;
+	// var bottom2 = rect2.y-rect2.h; //+ or -?
+	// var right2 = rect2.x+rect2.w;
+
+	//check if r
+	if(ptinrect(makepoint(rect1.x, rect1.y), rect2))
+	 	debugger;
+}
+
+makepoint = function(x,y)
+{
+	return new Point(x,y);
+}

@@ -45,10 +45,10 @@ soldier.prototype = {
 		//ctx.translate(this.w/2,this.h/2);
  		ctx.rotate(this.lookangle*Math.PI/180); // rotate
  		//debugger;
-		if(this.selected){
-			ctx.arc(0,0,40,0,2*Math.PI,false);
-			ctx.stroke();
-		}
+		// if(this.selected){
+		// 	ctx.arc(0,0,40,0,2*Math.PI,false);
+		// 	ctx.stroke();
+		// }
 
 		if(this.firing)
     		ctx.drawImage(document.getElementById("gunfire"),-2,-24,this.w/3,this.h/3);
@@ -163,8 +163,6 @@ window.onload = function() {
   	canvas_w = ctx.canvas.width  = window.innerWidth;
   	canvas_h = ctx.canvas.height = window.innerHeight;
 
- 	drawdashboard();
-
 	while(soldier_count<num_soldiers) {
 		ls = new soldier(canvas_w-400-(soldier_count*50),canvas_h-100-(soldier_count*50));
 		ls.draw();
@@ -177,7 +175,7 @@ window.onload = function() {
 
 function zombiesoldier()
 {
-	console.log('zombiesoldier command');
+	// console.log('zombiesoldier command');
 	i = 0;
 	while(i<num_soldiers-1) {
 		num = Math.floor(Math.random()*11);
@@ -203,13 +201,14 @@ function zombiesoldier()
 				soldiers[i].lookangle -= 20;
 				break;
 		}
+		rectscollide(soldiers[i].rect, soldiers[3].rect);
 		i++;
 	}
 
-	console.log(num);
+	// console.log(num);
 }
 
 
-function drawdashboard()
+function updatedashboard()
 {
 }
