@@ -26,7 +26,7 @@ soldier = function(x, y){
 	this.h = 29;
 	//this.element = elem;
 	this.loc = new Point(x,y);
-	this.rect = new Rect(0,0,0,0);
+	this.rect = new Rect(this.loc.x-this.w/2-increment*2,this.loc.y-this.h/2-increment*2,this.w+(4*increment),this.h+(4*increment));
 	this.ywalkloc = 1;
 	this.ywalkcycle = [	"soldier_walking_1", 
 						"soldier_walking_2",
@@ -48,7 +48,7 @@ soldier.prototype = {
  		ctx.rotate(this.lookangle*Math.PI/180); // rotate
 
 		if(this.firing)
-    		ctx.drawImage(document.getElementById("gunfire"),-2,-24,this.w/3,this.h/3);
+    		ctx.drawImage(document.getElementById("gunfire"),-2,-19,this.w/3,this.h/3);
 
 		ctx.drawImage(document.getElementById(this.walkingimage(movesoldier)),
 			-this.w/2,-this.h/2,this.w,this.h);
