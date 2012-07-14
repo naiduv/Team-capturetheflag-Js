@@ -14,6 +14,18 @@ Rect = function(x,y,w,h){
 }
 
 Rect.prototype = {
+	getcorners: function(){
+		pts = [];
+		pts.push(makepoint(this.x, this.y));
+		pts.push(makepoint(this.x+this.w, this.y));
+		pts.push(makepoint(this.x, this.y+this.h));
+		pts.push(makepoint(this.x+this.w, this.y+this.h));
+		return pts; 
+	},
+
+	clear: function(ctx){
+		ctx.clearRect(this.x, this.y, this.w, this.h);
+	}
 };
 
 //checks if x is between a and b (a<x<b or b<x<a)
@@ -43,22 +55,21 @@ ptinrect = function(pt, rect)
 
 rectscollide = function(rect1, rect2)
 {	
-	// var top1 = rect1.y;
-	// var left1 = rect1.x;
-	// var bottom1 = rect1.y-rect1.h; //+ or -?
-	// var right1 = rect1.x+rect1.w;
-
-	// var top2 = rect2.y;
-	// var left2 = rect2.x;
-	// var bottom2 = rect2.y-rect2.h; //+ or -?
-	// var right2 = rect2.x+rect2.w;
-
-	//check if r
-	if(ptinrect(makepoint(rect1.x, rect1.y), rect2))
-	 	debugger;
+	pts = rect1.getcorners();
+	for (i in pts) {
+		if (ptinrect(pts[i], rect2)) {
+			return true;
+		}
+	}
+	return false;
 }
 
 makepoint = function(x,y)
 {
 	return new Point(x,y);
+}
+
+makerect = function(x,y,w,h)
+{
+	return new Rect(x,y,w,h);
 }
