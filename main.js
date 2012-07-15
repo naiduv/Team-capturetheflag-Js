@@ -48,7 +48,7 @@ soldier.prototype = {
  		ctx.rotate(this.lookangle*Math.PI/180); // rotate
 
 		if(this.firing)
-    		ctx.drawImage(document.getElementById("gunfire"),-2,-19,this.w/3,this.h/3);
+    		ctx.drawImage(document.getElementById("gunfire"),0,-19,this.w/3,this.h/3);
 
 		ctx.drawImage(document.getElementById(this.walkingimage(movesoldier)),
 			-this.w/2,-this.h/2,this.w,this.h);
@@ -131,15 +131,13 @@ window.onmousedown = function(e){
 	if(ls==undefined)
 		return;
 
-	mpt = new Point(e.pageX, e.pageY);
-	if(ptinrect(mpt,ls.rect)){
-		ls.selected = true;
-		return;
-	}
-
+	// mpt = new Point(e.pageX, e.pageY);
+	// if(ptinrect(mpt,ls.rect)){
+	// 	ls.selected = true;
+	// 	return;
+	// }
+	console.log('mousedown');
 	ls.fire();
-	console.log("fire");
-	return;
 }
 
 window.onresize = function()
