@@ -33,7 +33,7 @@ soldier = function(x, y){
 						"soldier_walking_3"];
 	this.firing = false;
 	this.ammo = 100;
-	this.pts = [];
+	_this = this;
 }
 
 var increment = 3;
@@ -103,11 +103,15 @@ soldier.prototype = {
 			return;
 
 		this.ammo--;
-		this.firing = true;
+		this.firing=true;
 		this.draw();
 
-		//this is a hack to delete the gunfire image..
-		this.firing = false;
+		setTimeout(function(_this) {_this.hidefire();},150,this);
+	},
+
+	hidefire: function(){
+		this.firing=false;
+		this.draw();
 	}
 }
 
@@ -131,12 +135,6 @@ window.onmousedown = function(e){
 	if(ls==undefined)
 		return;
 
-	// mpt = new Point(e.pageX, e.pageY);
-	// if(ptinrect(mpt,ls.rect)){
-	// 	ls.selected = true;
-	// 	return;
-	// }
-	console.log('mousedown');
 	ls.fire();
 }
 
