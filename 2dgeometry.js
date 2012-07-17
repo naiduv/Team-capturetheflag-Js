@@ -25,7 +25,14 @@ Rect.prototype = {
 
 	clear: function(ctx){
 		ctx.clearRect(this.x, this.y, this.w, this.h);
-	}
+	},
+
+	stroke: function(ctx, lw, color){
+		ctx.lineWidth = lw;
+     	ctx.strokeStyle = color;
+		ctx.strokeRect(this.x,this.y, this.w, this.h);
+
+	},
 };
 
 //checks if x is between a and b (a<x<b or b<x<a)

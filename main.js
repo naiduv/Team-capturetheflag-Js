@@ -45,8 +45,7 @@ soldier.prototype = {
 	draw : function(movesoldier){
 		ctx.save(); // save current state
 		this.rect.clear(ctx);
-		// ctx.strokeRect(this.loc.x-this.w/2-increment,this.loc.y-this.h/2-increment,this.w+2*increment,this.h+2*increment);
-
+		
 		ctx.translate(this.loc.x, this.loc.y);
  		ctx.rotate(this.lookangle*Math.PI/180); // rotate
 
@@ -57,7 +56,7 @@ soldier.prototype = {
     		ctx.drawImage(document.getElementById("gunfire"),0,-19,this.w/3,this.h/3);
 
     	if(this.bleeding)
-    		ctx.drawImage(document.getElementById("bleeding"),0,0,this.w/2,this.h/2);
+    		ctx.drawImage(document.getElementById("bleeding"),0,0,this.w/1,this.h/1);
 
 		ctx.restore();
 	},
@@ -78,7 +77,7 @@ soldier.prototype = {
     	
 		if(!force) {
     		for (var i in soldiers) {
-    			if(this.id!=soldiers[i].id && rectscollide(this.rect, soldiers[i].rect)) {
+    			if(this.id!=soldiers[i].id && soldiers[i].alive && rectscollide(this.rect, soldiers[i].rect)) {
 					this.movedown(true);
     				return;
     			}
@@ -129,7 +128,7 @@ soldier.prototype = {
 		if(this.health<=0)
 			this.kill();
 		else
-			setTimeout(function(_this) {_this.stopbleeding();},150,this);
+			setTimeout(function(_this) {_this.stopbleeding();},50,this);
 	},
 
 	stopbleeding: function(){
@@ -144,10 +143,6 @@ soldier.prototype = {
 	},
 
 }
-
-window.onselectstart = function() {
-	return false;
-    }
 
 window.onkeydown = function(e){
 	if(ls==undefined)
@@ -184,8 +179,10 @@ window.onresize = function()
 //this should be done on the server?
 function sendhit(pt) {
 	for(var i in soldiers) {
-		if(ptinrect(pt,soldiers[i].rect))
+		if(ls.id!=soldiers[i].id && ptinrect(pt,soldiers[i].rect)) {
+			//soldiers[i].rect.stroke(ctx, '1', 'red');
 			soldiers[i].hit(35);
+		}
 	}
 }
 
@@ -209,7 +206,8 @@ window.onmousemove = function(e){
 
 var soldiers = [];
 var num_soldiers = 4;
-
+var canvas_w;
+var canvas_h;
 //when the page loads init your vars and get the canvas and context
 window.onload = function() {
 	c = document.getElementById("myCanvas");
@@ -218,7 +216,7 @@ window.onload = function() {
   	canvas_h = ctx.canvas.height = window.innerHeight;
 
 	while(soldier_count<num_soldiers) {
-		ls = new soldier(canvas_w-400-(soldier_count*50),canvas_h-100-(soldier_count*50));
+		ls = new soldier(100+Math.floor(Math.random()*(canvas_w-200)),100+Math.floor(Math.random()*(canvas_h-200)));
 		ls.draw();
 		soldiers.push(ls);
 		soldier_count++;
