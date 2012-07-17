@@ -145,6 +145,10 @@ soldier.prototype = {
 
 }
 
+window.onselectstart = function() {
+	return false;
+    }
+
 window.onkeydown = function(e){
 	if(ls==undefined)
 		return;
