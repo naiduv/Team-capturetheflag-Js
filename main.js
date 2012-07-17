@@ -33,6 +33,9 @@ soldier = function(x, y){
 						"soldier_walking_3"];
 	this.firing = false;
 	this.ammo = 100;
+	this.health = 100;
+	this.alive = true;
+	this.bleeding = false;
 	_this = this;
 }
 
@@ -47,12 +50,15 @@ soldier.prototype = {
 		ctx.translate(this.loc.x, this.loc.y);
  		ctx.rotate(this.lookangle*Math.PI/180); // rotate
 
+		ctx.drawImage(document.getElementById(this.walkingimage(movesoldier)),
+			-this.w/2,-this.h/2,this.w,this.h); //save the returns of document.getelementbyid in variables! should be faster
+		
 		if(this.firing)
     		ctx.drawImage(document.getElementById("gunfire"),0,-19,this.w/3,this.h/3);
 
-		ctx.drawImage(document.getElementById(this.walkingimage(movesoldier)),
-			-this.w/2,-this.h/2,this.w,this.h);
-		
+    	if(this.bleeding)
+    		ctx.drawImage(document.getElementById("bleeding"),0,0,this.w/2,this.h/2);
+
 		ctx.restore();
 	},
 
@@ -71,7 +77,6 @@ soldier.prototype = {
     	this.rect = makerect(this.loc.x-this.w/2-increment*2,this.loc.y-this.h/2-increment*2,this.w+(4*increment),this.h+(4*increment));
     	
 		if(!force) {
-			console.log(force);
     		for (var i in soldiers) {
     			if(this.id!=soldiers[i].id && rectscollide(this.rect, soldiers[i].rect)) {
 					this.movedown(true);
@@ -106,13 +111,38 @@ soldier.prototype = {
 		this.firing=true;
 		this.draw();
 
-		setTimeout(function(_this) {_this.hidefire();},150,this);
+		setTimeout(function(_this) {_this.hidefire();},100,this);
 	},
 
 	hidefire: function(){
 		this.firing=false;
 		this.draw();
-	}
+	},
+
+	hit: function(damage){
+		console.log('hit');
+		this.health -= damage;
+		
+		this.bleeding = true;
+		this.draw();
+
+		if(this.health<=0)
+			this.kill();
+		else
+			setTimeout(function(_this) {_this.stopbleeding();},150,this);
+	},
+
+	stopbleeding: function(){
+		this.bleeding = false;
+		if(this.alive) this.draw();
+	},
+
+	kill: function(){
+		this.alive = false;
+		this.loc.x = 10000; //hack to make it go away
+		this.rect.clear(ctx);
+	},
+
 }
 
 window.onkeydown = function(e){
@@ -131,10 +161,11 @@ window.onkeydown = function(e){
 	}
 }
 
-window.onmousedown = function(e){
+window.onmouseup = function(e){
 	if(ls==undefined)
 		return;
 
+	sendhit(makepoint(e.pageX, e.pageY));
 	ls.fire();
 }
 
@@ -144,6 +175,13 @@ window.onresize = function()
   ctx = c.getContext("2d");
   ctx.canvas.width  = window.innerWidth;
   ctx.canvas.height = window.innerHeight;
+}
+
+function sendhit(pt) {
+	for(var i in soldiers) {
+		if(ptinrect(pt,soldiers[i].rect))
+			soldiers[i].hit(35);
+	}
 }
 
 window.onmousemove = function(e){
@@ -188,8 +226,9 @@ window.onload = function() {
 function zombiesoldier()
 {
 	// console.log('zombiesoldier command');
-	var i = 0;
-	while(i<num_soldiers-1) {
+	for (var i in soldiers) {
+		if(i==num_soldiers-1 || !soldiers[i].alive)
+			continue;
 		num = Math.floor(Math.random()*11);
 		switch(num)
 		{	
@@ -213,7 +252,6 @@ function zombiesoldier()
 				soldiers[i].lookangle -= 20;
 				break;
 		}
-		i++;
 	}	
 }
 
