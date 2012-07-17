@@ -181,6 +181,7 @@ window.onresize = function()
   ctx.canvas.height = window.innerHeight;
 }
 
+//this should be done on the server?
 function sendhit(pt) {
 	for(var i in soldiers) {
 		if(ptinrect(pt,soldiers[i].rect))
@@ -208,8 +209,7 @@ window.onmousemove = function(e){
 
 var soldiers = [];
 var num_soldiers = 4;
-var canvas_w;
-var cavnvas_h;
+
 //when the page loads init your vars and get the canvas and context
 window.onload = function() {
 	c = document.getElementById("myCanvas");
