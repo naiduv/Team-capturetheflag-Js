@@ -39,7 +39,7 @@ soldier = function(x, y){
 	_this = this;
 }
 
-var increment = 3;
+var increment = 4;
 
 soldier.prototype = {
 	draw : function(movesoldier){
