@@ -274,7 +274,7 @@ function zombiesoldier()
 	}
 	if(livesoldiers<=0) {
 		stop_running = true;
-		window.location.reload();
+		document.location.reload(true);
 	}
 }
 
