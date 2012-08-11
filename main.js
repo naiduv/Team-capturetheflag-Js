@@ -161,12 +161,12 @@ window.onkeydown = function(e){
 	}
 }
 
-window.onmouseup = function(e){
+function canvasmouseup(e){
 	if(ls==undefined)
 		return;
 
-	x = g_realmousepos.layerX + 0.1*g_realmousepos.layerX; //90%css
-	y = g_realmousepos.layerY + 0.1*g_realmousepos.layerY;
+	x = e.layerX + 0.1*e.layerX; //90%css
+	y = e.layerY + 0.1*e.layerY;
 
 	sendhit(makepoint(x, y));
 	ls.fire();
@@ -193,12 +193,12 @@ function sendhit(pt) {
 	}
 }
 
-window.onmousemove = function(e){
+function canvasmousemove(e){
 	if(ls==undefined)
 		return;
 
-	ls.lookx = g_realmousepos.layerX + 0.1*g_realmousepos.layerX; //90% css
-	ls.looky = g_realmousepos.layerY + 0.1*g_realmousepos.layerY;
+	ls.lookx = e.layerX + 0.1*e.layerX; //90% css
+	ls.looky = e.layerY + 0.1*e.layerY;
 
 	//ctx.fillRect(ls.lookx, ls.looky, 2, 2);
 
@@ -213,11 +213,6 @@ window.onmousemove = function(e){
 	ls.draw();
 }
 
-var g_realmousepos;
-function getmousepos(e) {
-	g_realmousepos = e;	
-}
-
 var soldiers = [];
 var num_soldiers = 4;
 var canvas_w;
@@ -225,7 +220,8 @@ var canvas_h;
 //when the page loads init your vars and get the canvas and context
 window.onload = function() {
 	c = document.getElementById("myCanvas");
-	c.addEventListener('mousemove', getmousepos); 
+	c.addEventListener('mousemove', canvasmousemove);
+	c.addEventListener('mouseup', canvasmouseup);
  	ctx = c.getContext("2d");
   	canvas_w = ctx.canvas.width  = window.innerWidth;
   	canvas_h = ctx.canvas.height = window.innerHeight;
@@ -243,9 +239,11 @@ window.onload = function() {
 function zombiesoldier()
 {
 	// console.log('zombiesoldier command');
+	livesoldiers = 0;
 	for (var i in soldiers) {
 		if(i==num_soldiers-1 || !soldiers[i].alive)
 			continue;
+		livesoldiers++;
 		num = Math.floor(Math.random()*11);
 		switch(num)
 		{	
@@ -269,7 +267,9 @@ function zombiesoldier()
 				soldiers[i].lookangle -= 20;
 				break;
 		}
-	}	
+	}
+	if(livesoldiers<=0)
+		window.location.reload();
 }
 
 
