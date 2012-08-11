@@ -45,7 +45,7 @@ soldier.prototype = {
 	draw : function(movesoldier){
 		ctx.save(); // save current state
 		this.rect.clear(ctx);
-		
+
 		ctx.translate(this.loc.x, this.loc.y);
  		ctx.rotate(this.lookangle*Math.PI/180); // rotate
 
@@ -123,6 +123,7 @@ soldier.prototype = {
 		this.health -= damage;
 		
 		this.bleeding = true;
+
 		this.draw();
 
 		if(this.health<=0)
@@ -164,7 +165,10 @@ window.onmouseup = function(e){
 	if(ls==undefined)
 		return;
 
-	sendhit(makepoint(e.pageX, e.pageY));
+	x = g_realmousepos.layerX + 0.1*g_realmousepos.layerX; //90%css
+	y = g_realmousepos.layerY + 0.1*g_realmousepos.layerY;
+
+	sendhit(makepoint(x, y));
 	ls.fire();
 }
 
@@ -178,10 +182,13 @@ window.onresize = function()
 
 //this should be done on the server?
 function sendhit(pt) {
+	//ctx.fillRect(pt.x,pt.y,4,4);
 	for(var i in soldiers) {
 		if(ls.id!=soldiers[i].id && ptinrect(pt,soldiers[i].rect)) {
 			//soldiers[i].rect.stroke(ctx, '1', 'red');
 			soldiers[i].hit(35);
+			//soldiers[i].rect.stroke(ctx);
+			//ctx.fillRect(pt.x,pt.y,4,4);
 		}
 	}
 }
@@ -189,9 +196,11 @@ function sendhit(pt) {
 window.onmousemove = function(e){
 	if(ls==undefined)
 		return;
-	
-	ls.lookx = e.pageX;
-	ls.looky = e.pageY;
+
+	ls.lookx = g_realmousepos.layerX + 0.1*g_realmousepos.layerX; //90% css
+	ls.looky = g_realmousepos.layerY + 0.1*g_realmousepos.layerY;
+
+	//ctx.fillRect(ls.lookx, ls.looky, 2, 2);
 
 	disty = ls.loc.y - ls.looky;
 	distx = ls.loc.x - ls.lookx;
@@ -204,6 +213,11 @@ window.onmousemove = function(e){
 	ls.draw();
 }
 
+var g_realmousepos;
+function getmousepos(e) {
+	g_realmousepos = e;	
+}
+
 var soldiers = [];
 var num_soldiers = 4;
 var canvas_w;
@@ -211,6 +225,7 @@ var canvas_h;
 //when the page loads init your vars and get the canvas and context
 window.onload = function() {
 	c = document.getElementById("myCanvas");
+	c.addEventListener('mousemove', getmousepos); 
  	ctx = c.getContext("2d");
   	canvas_w = ctx.canvas.width  = window.innerWidth;
   	canvas_h = ctx.canvas.height = window.innerHeight;
