@@ -217,7 +217,7 @@ var soldiers = [];
 var num_soldiers = 4;
 var canvas_w;
 var canvas_h;
-var stop_run = false;
+var stop_running = false;
 //when the page loads init your vars and get the canvas and context
 window.onload = function() {
 	c = document.getElementById("myCanvas");
@@ -235,7 +235,7 @@ window.onload = function() {
 	}
 
 	self.setInterval(function(){
-		if(!stop_run)
+		if(!stop_running)
 			zombiesoldier();
 	}, 70);
 }
