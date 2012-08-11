@@ -217,6 +217,7 @@ var soldiers = [];
 var num_soldiers = 4;
 var canvas_w;
 var canvas_h;
+var stop_run = false;
 //when the page loads init your vars and get the canvas and context
 window.onload = function() {
 	c = document.getElementById("myCanvas");
@@ -233,7 +234,10 @@ window.onload = function() {
 		soldier_count++;
 	}
 
-	self.setInterval(function(){zombiesoldier();}, 70);
+	self.setInterval(function(){
+		if(!stop_run)
+			zombiesoldier();
+	}, 70);
 }
 
 function zombiesoldier()
@@ -268,8 +272,10 @@ function zombiesoldier()
 				break;
 		}
 	}
-	if(livesoldiers<=0)
+	if(livesoldiers<=0) {
+		stop_running = true;
 		window.location.reload();
+	}
 }
 
 
