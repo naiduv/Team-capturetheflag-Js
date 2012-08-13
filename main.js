@@ -181,24 +181,27 @@ function canvasmouseup(e){
 }
 
 function handleclick(pt){
-	var soldierselected = false;
+	var soldierselected = (ls!=0); 
+	var newsoldierselected = false;
 	for (var i in soldiers) {
 		//if no soldier is selected, try to select one
 		if(ls==0 && ptinrect(pt, soldiers[i].rect)) {
 			ls = soldiers[i];
-			i = numsoldiers;
-			soldierselected = true;
+			i = num_soldiers;
+			newsoldierselected = true;
 		}
 		//if a soldier is selected, try hitting opposing teammates
 		else if(ls!=0 && ptinrect(pt,soldiers[i].rect) && ls.teamid!=soldiers[i].teamid) {
 			soldiers[i].hit(35);
-			i = numsoldiers;
+			i = num_soldiers;
 		}
 	}
 
-	//soldier is selected and user clicks on empty spot
-	if(!soldierselected) {
+	//soldier is selected prevand user clicks on empty spot
+	if(!newsoldierselected && soldierselected) {
 		ls.waypoint = pt;
+		ctx.fillStyle="#FF0000";
+		//ctx.fillRect(pt.x, pt.y,4,4);
 		ls = 0;
 	}
 }
@@ -283,8 +286,10 @@ function commandloop() {
 
 		if(soldiers[i].waypoint!=0) {
 			soldiers[i].moveup();
-			if(ptinrect(soldiers[i].waypoint, soldiers[i].rect))
+			if(ptinrect(soldiers[i].waypoint, soldiers[i].rect)) {
+				//ctx.clearRect(soldiers[i].waypoint.x, soldiers[i].waypoint.y,5,5);
 				soldiers[i].waypoint = 0;
+			}
 		}
 	}
 
