@@ -192,7 +192,7 @@ function tryselectsoldier(pt){
 		}
 	}
 
-	//deselect ls
+	//soldier is selected and user clicks on empty spot
 	if(!soldierselected) {
 		ls = 0;
 	}
@@ -300,6 +300,7 @@ function zombiesoldier()
 				break;
 		}
 	}
+
 	if(livesoldiers<=0) {
 		stop_running = true;
 		document.location.reload(true);
