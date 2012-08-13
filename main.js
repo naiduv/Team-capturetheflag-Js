@@ -151,7 +151,7 @@ soldier.prototype = {
 }
 
 window.onkeydown = function(e){
-	if(ls==undefined)
+	if(ls==0)
 		return;
 
 	console.log('keyup');
@@ -167,26 +167,34 @@ window.onkeydown = function(e){
 }
 
 function canvasmouseup(e){
-	if(ls==undefined)
-		return;
+	// if(ls==0)
+	// 	return;
 
 	x = e.layerX + 0.1*e.layerX; //90%css
 	y = e.layerY + 0.1*e.layerY;
 
 	//send a hit if its not a teammate
-	if(ls.teamid!=soldiers[i].teamid)
-		sendhit(makepoint(x, y));
+	if(ls!=0 && ls.teamid!=soldiers[i].teamid)
+		tryhit(makepoint(x, y));
 	else
-		selectsoldier(makepoint(x,y));
+		tryselectsoldier(makepoint(x,y));
+
 	ls.fire();
 }
 
-function selectsoldier(pt){
+function tryselectsoldier(pt){
+	var soldierselected = false;
 	for (var i in soldiers) {
 		if(ptinrect(pt, soldiers[i].rect)) {
 			ls = soldiers[i];
 			i = numsoldiers;
+			soldierselected = true;
 		}
+	}
+
+	//deselect ls
+	if(!soldierselected) {
+		ls = 0;
 	}
 }
 
@@ -199,7 +207,7 @@ window.onresize = function()
 }
 
 //this should be done on the server?
-function sendhit(pt) {
+function tryhit(pt) {
 	//ctx.fillRect(pt.x,pt.y,4,4);
 	for(var i in soldiers) {
 		//dont shoot self or teammates
@@ -213,9 +221,10 @@ function sendhit(pt) {
 }
 
 function canvasmousemove(e){
-	if(ls==undefined)
+	if(ls==0)
 		return;
 
+	//calculate where the soldier is looking
 	ls.lookx = e.layerX + 0.1*e.layerX; //90% css
 	ls.looky = e.layerY + 0.1*e.layerY;
 
