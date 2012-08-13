@@ -19,6 +19,7 @@ var idcount = 0;
 soldier = function(x, y){
 	this.selected = false;
 	this.id = Math.floor(Math.random()*10000);
+	this.teamid = 1;
 	this.lookx= 0;
 	this.looky = 0;
 	this.lookangle = 0;
@@ -75,6 +76,7 @@ soldier.prototype = {
 		this.loc.y -= increment*Math.cos(this.lookangle*Math.PI/180);
     	this.rect = makerect(this.loc.x-this.w/2-increment*2,this.loc.y-this.h/2-increment*2,this.w+(4*increment),this.h+(4*increment));
     	
+    	//forcing it down if it collides with another rect
 		if(!force) {
     		for (var i in soldiers) {
     			if(this.id!=soldiers[i].id && soldiers[i].alive && rectscollide(this.rect, soldiers[i].rect)) {
@@ -91,6 +93,8 @@ soldier.prototype = {
 		this.loc.x -= increment*Math.sin(this.lookangle*Math.PI/180);
 		this.loc.y += increment*Math.cos(this.lookangle*Math.PI/180);	
 		this.rect = makerect(this.loc.x-this.w/2-increment*2,this.loc.y-this.h/2-increment*2,this.w+(4*increment),this.h+(4*increment));
+
+		//forcing it up if it collides with another rect
 		if(!force) {
     		for (var i in soldiers) {
     			if(this.id!=soldiers[i].id && rectscollide(this.rect, soldiers[i].rect)) {
@@ -99,6 +103,7 @@ soldier.prototype = {
     			}
     		}
     	}
+
 		this.draw(true);
 	},
 
@@ -168,8 +173,21 @@ function canvasmouseup(e){
 	x = e.layerX + 0.1*e.layerX; //90%css
 	y = e.layerY + 0.1*e.layerY;
 
-	sendhit(makepoint(x, y));
+	//send a hit if its not a teammate
+	if(ls.teamid!=soldiers[i].teamid)
+		sendhit(makepoint(x, y));
+	else
+		selectsoldier(makepoint(x,y));
 	ls.fire();
+}
+
+function selectsoldier(pt){
+	for (var i in soldiers) {
+		if(ptinrect(pt, soldiers[i].rect)) {
+			ls = soldiers[i];
+			i = numsoldiers;
+		}
+	}
 }
 
 window.onresize = function()
@@ -184,6 +202,7 @@ window.onresize = function()
 function sendhit(pt) {
 	//ctx.fillRect(pt.x,pt.y,4,4);
 	for(var i in soldiers) {
+		//dont shoot self or teammates
 		if(ls.id!=soldiers[i].id && ptinrect(pt,soldiers[i].rect)) {
 			//soldiers[i].rect.stroke(ctx, '1', 'red');
 			soldiers[i].hit(35);
@@ -245,7 +264,7 @@ function zombiesoldier()
 	// console.log('zombiesoldier command');
 	livesoldiers = 0;
 	for (var i in soldiers) {
-		if(i==num_soldiers-1 || !soldiers[i].alive)
+		if(ls==soldiers[i] || !soldiers[i].alive)
 			continue;
 		livesoldiers++;
 		num = Math.floor(Math.random()*11);
