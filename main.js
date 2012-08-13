@@ -10,13 +10,13 @@ randfunc = function(){
 		return -1;
 }
 
-var unit_count = 0;
+var soldier_count = 0;
 var timer;
 var ammo = 0;
 
 var idcount = 0;
 
-unit = function(x, y){
+soldier = function(x, y){
 	this.selected = false;
 	this.id = Math.floor(Math.random()*10000);
 	this.teamid = 1;
@@ -29,28 +29,29 @@ unit = function(x, y){
 	this.loc = new Point(x,y);
 	this.rect = new Rect(this.loc.x-this.w/2-increment*2,this.loc.y-this.h/2-increment*2,this.w+(4*increment),this.h+(4*increment));
 	this.ywalkloc = 1;
-	this.ywalkcycle = [	"unit_walking_1", 
-						"unit_walking_2",
-						"unit_walking_3"];
+	this.ywalkcycle = [	"soldier_walking_1", 
+						"soldier_walking_2",
+						"soldier_walking_3"];
 	this.firing = false;
 	this.ammo = 100;
 	this.health = 100;
 	this.alive = true;
 	this.bleeding = false;
+	this.waypoint = 0;
 	_this = this;
 }
 
 var increment = 4;
 
-unit.prototype = {
-	draw : function(moveunit){
+soldier.prototype = {
+	draw : function(movesoldier){
 		ctx.save(); // save current state
 		this.rect.clear(ctx);
 
 		ctx.translate(this.loc.x, this.loc.y);
  		ctx.rotate(this.lookangle*Math.PI/180); // rotate
 
-		ctx.drawImage(document.getElementById(this.walkingimage(moveunit)),
+		ctx.drawImage(document.getElementById(this.walkingimage(movesoldier)),
 			-this.w/2,-this.h/2,this.w,this.h); //save the returns of document.getelementbyid in variables! should be faster
 		
 		if(this.firing)
@@ -62,8 +63,8 @@ unit.prototype = {
 		ctx.restore();
 	},
 
-	walkingimage: function(moveunit){
-		if(moveunit) {		
+	walkingimage: function(movesoldier){
+		if(movesoldier) {		
 			this.ywalkloc++;
 			if(this.ywalkloc==3)
 				this.ywalkloc=0;
@@ -78,8 +79,8 @@ unit.prototype = {
     	
     	//forcing it down if it collides with another rect
 		if(!force) {
-    		for (var i in units) {
-    			if(this.id!=units[i].id && units[i].alive && rectscollide(this.rect, units[i].rect)) {
+    		for (var i in soldiers) {
+    			if(this.id!=soldiers[i].id && soldiers[i].alive && rectscollide(this.rect, soldiers[i].rect)) {
 					this.movedown(true);
     				return;
     			}
@@ -96,8 +97,8 @@ unit.prototype = {
 
 		//forcing it up if it collides with another rect
 		if(!force) {
-    		for (var i in units) {
-    			if(this.id!=units[i].id && rectscollide(this.rect, units[i].rect)) {
+    		for (var i in soldiers) {
+    			if(this.id!=soldiers[i].id && rectscollide(this.rect, soldiers[i].rect)) {
     				this.moveup(true);
     				return;
     			}
@@ -174,29 +175,47 @@ function canvasmouseup(e){
 	y = e.layerY + 0.1*e.layerY;
 
 	//send a hit if its not a teammate
-	if(ls!=0 && ls.teamid!=units[i].teamid)
-		tryhit(makepoint(x, y));
-	else
-		tryselectunit(makepoint(x,y));
+	handleclick(makepoint(x, y));
 
-	ls.fire();
+	//ls.fire();
 }
 
-function tryselectunit(pt){
-	var unitselected = false;
-	for (var i in units) {
-		if(ptinrect(pt, units[i].rect)) {
-			ls = units[i];
-			i = numunits;
-			unitselected = true;
+function handleclick(pt){
+	var soldierselected = false;
+	for (var i in soldiers) {
+		//if no soldier is selected, try to select one
+		if(ls==0 && ptinrect(pt, soldiers[i].rect)) {
+			ls = soldiers[i];
+			i = numsoldiers;
+			soldierselected = true;
+		}
+		//if a soldier is selected, try hitting opposing teammates
+		else if(ls!=0 && ptinrect(pt,soldiers[i].rect) && ls.teamid!=soldiers[i].teamid) {
+			soldiers[i].hit(35);
+			i = numsoldiers;
 		}
 	}
 
-	//unit is selected and user clicks on empty spot
-	if(!unitselected) {
+	//soldier is selected and user clicks on empty spot
+	if(!soldierselected) {
+		ls.waypoint = pt;
 		ls = 0;
 	}
 }
+
+//this should be done on the server?
+// function tryhit(pt) {
+// 	//ctx.fillRect(pt.x,pt.y,4,4);
+// 	for(var i in soldiers) {
+// 		//dont shoot self or teammates
+// 		if(ls.id!=soldiers[i].id && ptinrect(pt,soldiers[i].rect) && ls.teamid!=soldiers[i].teamid) {
+// 			//soldiers[i].rect.stroke(ctx, '1', 'red');
+// 			soldiers[i].hit(35);
+// 			//soldiers[i].rect.stroke(ctx);
+// 			//ctx.fillRect(pt.x,pt.y,4,4);
+// 		}
+// 	}
+// }
 
 window.onresize = function()
 {
@@ -206,25 +225,11 @@ window.onresize = function()
   ctx.canvas.height = window.innerHeight;
 }
 
-//this should be done on the server?
-function tryhit(pt) {
-	//ctx.fillRect(pt.x,pt.y,4,4);
-	for(var i in units) {
-		//dont shoot self or teammates
-		if(ls.id!=units[i].id && ptinrect(pt,units[i].rect)) {
-			//units[i].rect.stroke(ctx, '1', 'red');
-			units[i].hit(35);
-			//units[i].rect.stroke(ctx);
-			//ctx.fillRect(pt.x,pt.y,4,4);
-		}
-	}
-}
-
 function canvasmousemove(e){
 	if(ls==0)
 		return;
 
-	//calculate where the unit is looking
+	//calculate where the soldier is looking
 	ls.lookx = e.layerX + 0.1*e.layerX; //90% css
 	ls.looky = e.layerY + 0.1*e.layerY;
 
@@ -241,8 +246,8 @@ function canvasmousemove(e){
 	ls.draw();
 }
 
-var units = [];
-var num_units = 4;
+var soldiers = [];
+var num_soldiers = 4;
 var canvas_w;
 var canvas_h;
 var stop_running = false;
@@ -255,27 +260,48 @@ window.onload = function() {
   	canvas_w = ctx.canvas.width  = window.innerWidth;
   	canvas_h = ctx.canvas.height = window.innerHeight;
 
-	while(unit_count<num_units) {
-		ls = new unit(100+Math.floor(Math.random()*(canvas_w-200)),100+Math.floor(Math.random()*(canvas_h-200)));
+	while(soldier_count<num_soldiers) {
+		ls = new soldier(100+Math.floor(Math.random()*(canvas_w-200)),100+Math.floor(Math.random()*(canvas_h-200)));
 		ls.draw();
-		units.push(ls);
-		unit_count++;
+		soldiers.push(ls);
+		soldier_count++;
 	}
 
 	self.setInterval(function(){
 		if(!stop_running)
-			zombieunit();
+			commandloop();
+			//randomloop();
 	}, 70);
 }
 
-function zombieunit()
-{
-	// console.log('zombieunit command');
-	liveunits = 0;
-	for (var i in units) {
-		if(ls==units[i] || !units[i].alive)
+function commandloop() {
+	livesoldiers = 0;
+	for (var i in soldiers) {
+		if(ls==soldiers[i] || !soldiers[i].alive)
 			continue;
-		liveunits++;
+		livesoldiers++;
+
+		if(soldiers[i].waypoint!=0) {
+			soldiers[i].moveup();
+			if(ptinrect(soldiers[i].waypoint, soldiers[i].rect))
+				soldiers[i].waypoint = 0;
+		}
+	}
+
+	if(livesoldiers<=0) {
+		stop_running = true;
+		document.location.reload(true);
+	}
+}
+
+function randomloop()
+{
+	// console.log('zombiesoldier command');
+	livesoldiers = 0;
+	for (var i in soldiers) {
+		if(ls==soldiers[i] || !soldiers[i].alive)
+			continue;
+		livesoldiers++;
 		num = Math.floor(Math.random()*11);
 		switch(num)
 		{	
@@ -287,21 +313,21 @@ function zombieunit()
 			case 5:
 			case 6:
 			case 7:
-				units[i].moveup();
+				soldiers[i].moveup();
 				break;
 			case 8:
-				units[i].fire();
+				soldiers[i].fire();
 				break;
 			case 9:
-				units[i].lookangle += 20;
+				soldiers[i].lookangle += 20;
 				break;	
 			case 10:
-				units[i].lookangle -= 20;
+				soldiers[i].lookangle -= 20;
 				break;
 		}
 	}
 
-	if(liveunits<=0) {
+	if(livesoldiers<=0) {
 		stop_running = true;
 		document.location.reload(true);
 	}
