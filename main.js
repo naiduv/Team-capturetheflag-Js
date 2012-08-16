@@ -37,7 +37,7 @@ soldier = function(x, y){
 	this.health = 100;
 	this.alive = true;
 	this.bleeding = false;
-	this.waypoint = 0;
+	this.waypoint = [];
 	_this = this;
 }
 
@@ -149,6 +149,23 @@ soldier.prototype = {
 		this.rect.clear(ctx);
 	},
 
+	lookat: function(pt){
+		this.lookx = pt.x;
+		this.looky = pt.y;
+
+		this.calclookangle();
+	},
+
+	calclookangle: function(){
+		disty = this.loc.y - this.looky;
+		distx = this.loc.x - this.lookx;
+		hyp = Math.sqrt(disty*disty + distx*distx);
+	
+		this.lookangle =Math.atan2(disty,distx) * 180/Math.PI; 
+		if (this.lookangle < 0) this.lookangle += 360;
+		this.lookangle -=90;
+	}
+
 }
 
 window.onkeydown = function(e){
@@ -181,28 +198,35 @@ function canvasmouseup(e){
 }
 
 function handleclick(pt){
-	var soldierselected = (ls!=0); 
+	var wassoldierselected = (ls!=0); 
 	var newsoldierselected = false;
 	for (var i in soldiers) {
-		//if no soldier is selected, try to select one
-		if(ls==0 && ptinrect(pt, soldiers[i].rect)) {
+		//if we click on a soldier, try to select one
+		if(ptinrect(pt, soldiers[i].rect)) {
+			//if soldier was already selected, direct it to the last waypoint so it can start moving
+			// if(ls!=0) {
+			// 	if(ls.waypoint.length) {
+			// 		console.log('force look at the first waypoint');
+			// 		ls.lookat(ls.waypoint[0]);
+			// 	}
+			// }
 			ls = soldiers[i];
-			i = num_soldiers;
 			newsoldierselected = true;
+			break;
 		}
 		//if a soldier is selected, try hitting opposing teammates
 		else if(ls!=0 && ptinrect(pt,soldiers[i].rect) && ls.teamid!=soldiers[i].teamid) {
 			soldiers[i].hit(35);
-			i = num_soldiers;
+			break;
 		}
 	}
 
-	//soldier is selected prevand user clicks on empty spot
-	if(!newsoldierselected && soldierselected) {
-		ls.waypoint = pt;
-		ctx.fillStyle="#FF0000";
-		//ctx.fillRect(pt.x, pt.y,4,4);
-		ls = 0;
+	//soldier was prev selected and user clicks on empty spot
+	if(wassoldierselected && !newsoldierselected) {
+		console.log('waypoint added')
+		ls.waypoint.push(pt);
+		//ctx.fillStyle="#FF0000";
+		//ls = 0;
 	}
 }
 
@@ -237,16 +261,16 @@ function canvasmousemove(e){
 	ls.looky = e.layerY + 0.1*e.layerY;
 
 	//ctx.fillRect(ls.lookx, ls.looky, 2, 2);
-
-	disty = ls.loc.y - ls.looky;
-	distx = ls.loc.x - ls.lookx;
-	hyp = Math.sqrt(disty*disty + distx*distx);
-	
-	ls.lookangle =Math.atan2(disty,distx) * 180/Math.PI; 
-	if (ls.lookangle < 0) ls.lookangle += 360;
-	ls.lookangle -=90;
-
+	ls.calclookangle();
 	ls.draw();
+}
+
+function canvasdblclick(e){
+	if(ls==0)
+		return;
+
+	console.log('dblclick');
+	ls = 0;
 }
 
 var soldiers = [];
@@ -259,6 +283,8 @@ window.onload = function() {
 	c = document.getElementById("myCanvas");
 	c.addEventListener('mousemove', canvasmousemove);
 	c.addEventListener('mouseup', canvasmouseup);
+	c.addEventListener('dblclick', canvasdblclick);
+
  	ctx = c.getContext("2d");
   	canvas_w = ctx.canvas.width  = window.innerWidth;
   	canvas_h = ctx.canvas.height = window.innerHeight;
@@ -283,12 +309,21 @@ function commandloop() {
 		if(ls==soldiers[i] || !soldiers[i].alive)
 			continue;
 		livesoldiers++;
-
-		if(soldiers[i].waypoint!=0) {
+		if(soldiers[i].waypoint.length) {
+			soldiers[i].lookat(soldiers[i].waypoint[0]);
 			soldiers[i].moveup();
-			if(ptinrect(soldiers[i].waypoint, soldiers[i].rect)) {
+			//when we get to a waypoint
+			if(ptinrect(soldiers[i].waypoint[0], soldiers[i].rect)) {
+				console.log('hit waypoint');
 				//ctx.clearRect(soldiers[i].waypoint.x, soldiers[i].waypoint.y,5,5);
-				soldiers[i].waypoint = 0;
+				//remove the waypoint
+				soldiers[i].waypoint.shift();
+				//point the soldier in the new waypoint dir, if it exists
+				if(soldiers[i].waypoint.length) {
+					//look at next waypoint
+					console.log('look at next waypoint');
+					soldiers[i].lookat(soldiers[i].waypoint[0]);
+				}
 			}
 		}
 	}
