@@ -27,7 +27,7 @@ soldier = function(x, y){
 	this.selected = false;
 	this.id = Math.floor(Math.random()*10000);
 	this.teamid = teamid;
-	this.lookpt = makepoint(0,0);
+	this.lookpt = makepoint(myrand(100),myrand(100));
 	this.lookangle = 0;
 	this.w = 25;
 	this.h = 29;
@@ -186,10 +186,12 @@ window.onkeydown = function(e){
 	
 	switch(e.keyCode) {
 		case 87:
+			if(!started) return;
 			fbgameref.push({func:"mu", teamid:teamid, id:ls.id, locx:ls.loc.x, locy:ls.loc.y, lookx:ls.lookpt.x, looky:ls.lookpt.y});
 			ls.moveup();
 			break;
 		case 83:
+			if(!started) return;
 			fbgameref.push({func:"md", teamid:teamid, id:ls.id, locx:ls.loc.x, locy:ls.loc.y, lookx:ls.lookpt.x, looky:ls.lookpt.y});		
 			ls.movedown();
 			break;
@@ -200,8 +202,8 @@ window.onkeydown = function(e){
 				gameid = gameidinput.value;
 				gameidinput.hidden = true;
 				//gameidform.hidden = true;
-				gameidform.innerText = "YOUR GAMEID IS " + gameid + ". INVITE FRIENDS TO JOIN!"
-				debugger;
+				gameidform.innerText = "YOUR GAMEID IS " + gameid + ". INVITE FRIENDS TO JOIN!";
+
 
 				fbgameref = fb.child(gameid);
 				fbgameref.on('child_added', function (snapshot) {
@@ -218,8 +220,10 @@ window.onkeydown = function(e){
 				   			//opp_soldiers[i].draw();
 				   			if(message.func=="mu")
 				   				opp_soldiers[i].moveup();
-				   			else
+				   			else if(message.func=="md")
 				   				opp_soldiers[i].movedown();
+				   			else if(message.func=="nm")
+				   				opp_soldiers[i].draw();
 
 				   			new_opp_soldier = false;
 				   			console.log('opp_soldier found, loc updated');
@@ -237,19 +241,6 @@ window.onkeydown = function(e){
 			}
 			break;
 	}
-}
-
-function canvasmouseup(e){
-	// if(ls==0)
-	// 	return;
-
-	x = e.layerX + 0.1*e.layerX; //90%css
-	y = e.layerY + 0.1*e.layerY;
-
-	//send a hit if its not a teammate
-	handleclick(makepoint(x, y));
-
-	//ls.fire();
 }
 
 function handleclick(pt){
@@ -295,6 +286,8 @@ window.onresize = function()
 }
 
 function canvasmousemove(e){
+	if(!started) return;
+
 	if(ls==0)
 		return;
 
@@ -307,7 +300,19 @@ function canvasmousemove(e){
 	ls.draw();
 }
 
+function canvasmouseup(e){
+	if(!started) return;
+
+	x = e.layerX + 0.1*e.layerX; //90%css
+	y = e.layerY + 0.1*e.layerY;
+
+	//send a hit if its not a teammate
+	handleclick(makepoint(x, y));
+
+}
+
 function canvasdblclick(e){
+	if(!started) return;
 	if(ls==0)
 		return;
 
@@ -338,6 +343,12 @@ function commandloop() {
 					soldiers[i].lookat(soldiers[i].waypoint[0]);
 				}
 			}
+		} else {
+			//if no commands just look around so that we are not cleaned out
+			soldiers[i].lookat(makepoint(soldiers[i].lookpt.x+myrand(1), soldiers[i].lookpt.y+myrand(1)));
+			fbgameref.push({func:"nm", teamid:teamid, id:soldiers[i].id, locx:soldiers[i].loc.x, locy:soldiers[i].loc.y, lookx:soldiers[i].lookpt.x, looky:soldiers[i].lookpt.y});
+			soldiers[i].draw();
+			// console.log('looking around' + Math.random()*1000);
 		}
 	}
 
@@ -345,6 +356,19 @@ function commandloop() {
 		stop_running = true;
 		document.location.reload(true);
 	}
+}
+
+function randomsign()
+{
+	if(Math.random()*10<=5)
+		return -1;
+	else
+		return 1;
+}
+
+function myrand(max)
+{
+	return randomsign()*(Math.random()*max);
 }
 
 //fb is changed after the gameid is entered!!!!! check onkeypress 13 (enter)
@@ -423,7 +447,9 @@ function mainloop(){
 }
 
 //THIS IS THE MAIN FUNCTION
+var started = false;
 function start(){
+	started=true;
 	initcanvas();
 	initsquad();
 	mainloop();
