@@ -1,6 +1,12 @@
 var bkcolor = "#FFFFFF"
-//this is your timer, does nothing right now
 var ls;
+var gameid;
+var soldiers = [];
+var num_soldiers = 3;
+var canvas_w;
+var canvas_h;
+var stop_running = false;
+var fb;
 
 //randomly returns a +1 or -1
 randfunc = function(){
@@ -175,7 +181,7 @@ window.onkeydown = function(e){
 	if(ls==0)
 		return;
 
-	console.log('keyup');
+	console.log('keydown' + e.keyCode);
 	
 	switch(e.keyCode) {
 		case 87:
@@ -184,6 +190,19 @@ window.onkeydown = function(e){
 			break;
 		case 83:
 			ls.movedown();
+			break;
+		case 13:
+			if(!gameid) {
+				var gameidform = document.getElementById('gameidform')
+				var gameidinput = document.getElementById('gameid');
+				gameid = gameidinput.value;
+				gameidinput.hidden = true;
+				gameidform.hidden = true;
+
+				initcanvas();
+				initsquad();
+				mainloop();
+			}
 			break;
 	}
 }
@@ -264,8 +283,6 @@ function canvasdblclick(e){
 	ls = 0;
 }
 
-var fb = new Firebase('http://gamma.firebase.com/Naiduv/');
-
 function commandloop() {
 	livesoldiers = 0;
 	for (var i in soldiers) {
@@ -298,9 +315,14 @@ function commandloop() {
 	}
 }
 
+//fb is changed after the gameid is entered!!!!! check onkeypress 13 (enter)
+fb = new Firebase('http://gamma.firebase.com/Naiduv/');
+
+
 var opp_soldiers = [];
-fb.on('child_added', function (snapshot) {
+fb.on('child_changed', function (snapshot) {
     var message = snapshot.val();
+    console.log('child_added');
     if(message.teamid==teamid)
     	return;
 
@@ -366,16 +388,7 @@ function randomloop()
 	}
 }
 
-
-//STARTS HERE
-
-var soldiers = [];
-var num_soldiers = 3;
-var canvas_w;
-var canvas_h;
-var stop_running = false;
-//when the page loads init your vars and get the canvas and context
-window.onload = function() {
+function initcanvas(){
 	c = document.getElementById("myCanvas");
 	c.addEventListener('mousemove', canvasmousemove);
 	c.addEventListener('mouseup', canvasmouseup);
@@ -384,7 +397,10 @@ window.onload = function() {
  	ctx = c.getContext("2d");
   	canvas_w = ctx.canvas.width  = window.innerWidth;
   	canvas_h = ctx.canvas.height = window.innerHeight;
+}
 
+//initialize the units
+function initsquad() {
 	while(soldier_count<num_soldiers) {
 		//ls = new soldier(100+Math.floor(Math.random()*(canvas_w-200)),100+Math.floor(Math.random()*(canvas_h-200)));
 		ls = new soldier((soldier_count*50)+50, (soldier_count)+canvas_h-50);
@@ -392,11 +408,18 @@ window.onload = function() {
 		soldiers.push(ls);
 		soldier_count++;
 	}
+}
 
+function mainloop(){
 	self.setInterval(function(){
 		if(!stop_running)
 			commandloop();
 			//randomloop();
 	}, 70);
 }
+
+//when the page loads init your vars and get the canvas and context
+window.onload = function() {
+}
+
 
