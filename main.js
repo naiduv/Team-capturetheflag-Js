@@ -261,7 +261,6 @@ var fb = new Firebase('http://gamma.firebase.com/Naiduv/');
 
 function commandloop() {
 	livesoldiers = 0;
-	locs = [];
 	for (var i in soldiers) {
 		if(ls==soldiers[i] || !soldiers[i].alive)
 			continue;
@@ -269,7 +268,7 @@ function commandloop() {
 		if(soldiers[i].waypoint.length) {
 			soldiers[i].lookat(soldiers[i].waypoint[0]);
 			soldiers[i].moveup();
-			locs.push(soldiers[i].loc);
+			fb.push({teamid:teamid, locx:soldiers[i].loc.x, locy:soldiers[i].loc.y});
 			//when we get to a waypoint
 			if(ptinrect(soldiers[i].waypoint[0], soldiers[i].rect)) {
 				console.log('hit waypoint');
@@ -286,17 +285,25 @@ function commandloop() {
 		}
 	}
 
-	fb.push({teamid:teamid, livesoldiers:livesoldiers, locs:locs});
 	if(livesoldiers<=0) {
 		stop_running = true;
 		document.location.reload(true);
 	}
 }
 
+var oldpt;
 fb.on('child_added', function (snapshot) {
     var message = snapshot.val();
     if(message.teamid==teamid)
     	return;
+
+    if(oldpt)
+    	ctx.clearRect(oldpt.x, oldpt.y, 25,29);
+    
+    oldpt = makepoint(message.locx, message.locy);
+    console.log("trying to draw at "+oldpt.x +" "+oldpt.y);
+
+    ctx.drawImage(document.getElementById("soldier_walking_1"),message.locx,message.locy,25,29);
 
   });
 
