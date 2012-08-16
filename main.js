@@ -190,6 +190,7 @@ window.onkeydown = function(e){
 			ls.moveup();
 			break;
 		case 83:
+			fbgameref.push({func:"md", teamid:teamid, id:ls.id, locx:ls.loc.x, locy:ls.loc.y, lookx:ls.lookpt.x, looky:ls.lookpt.y});		
 			ls.movedown();
 			break;
 		case 13:
@@ -198,7 +199,9 @@ window.onkeydown = function(e){
 				var gameidinput = document.getElementById('gameid');
 				gameid = gameidinput.value;
 				gameidinput.hidden = true;
-				gameidform.hidden = true;
+				//gameidform.hidden = true;
+				gameidform.innerText = "YOUR GAMEID IS " + gameid + ". INVITE FRIENDS TO JOIN!"
+				debugger;
 
 				fbgameref = fb.child(gameid);
 				fbgameref.on('child_added', function (snapshot) {
