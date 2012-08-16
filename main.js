@@ -197,19 +197,6 @@ function commandloop() {
 	}
 }
 
-function randomsign()
-{
-	if(Math.random()*10<=5)
-		return -1;
-	else
-		return 1;
-}
-
-function myrand(max)
-{
-	return randomsign()*(Math.random()*max);
-}
-
 //fb is changed after the gameid is entered!!!!! check onkeypress 13 (enter)
 // fb = new Firebase('http://gamma.firebase.com/Naiduv/' + gameid);
 
