@@ -20,8 +20,7 @@ soldier = function(x, y){
 	this.selected = false;
 	this.id = Math.floor(Math.random()*10000);
 	this.teamid = 1;
-	this.lookx= 0;
-	this.looky = 0;
+	this.lookpt = makepoint(0,0);
 	this.lookangle = 0;
 	this.w = 25;
 	this.h = 29;
@@ -150,15 +149,13 @@ soldier.prototype = {
 	},
 
 	lookat: function(pt){
-		this.lookx = pt.x;
-		this.looky = pt.y;
-
+		this.lookpt = pt;
 		this.calclookangle();
 	},
 
 	calclookangle: function(){
-		disty = this.loc.y - this.looky;
-		distx = this.loc.x - this.lookx;
+		distx = this.loc.x - this.lookpt.x;
+		disty = this.loc.y - this.lookpt.y;
 		hyp = Math.sqrt(disty*disty + distx*distx);
 	
 		this.lookangle =Math.atan2(disty,distx) * 180/Math.PI; 
@@ -257,8 +254,8 @@ function canvasmousemove(e){
 		return;
 
 	//calculate where the soldier is looking
-	ls.lookx = e.layerX + 0.1*e.layerX; //90% css
-	ls.looky = e.layerY + 0.1*e.layerY;
+	ls.lookpt.x = e.layerX + 0.1*e.layerX; //90% css
+	ls.lookpt.y = e.layerY + 0.1*e.layerY;
 
 	//ctx.fillRect(ls.lookx, ls.looky, 2, 2);
 	ls.calclookangle();
