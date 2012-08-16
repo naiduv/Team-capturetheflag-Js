@@ -40,6 +40,14 @@ soldier = function(x, y){
 	_this = this;
 }
 
+makesoldier = function(teamid, id,x,y,lookx,looky) {
+	s = new soldier(x,y);
+	s.teamid = teamid;
+	s.id = id;
+	s.lookpt = makepoint(lookx, looky);
+	return s;
+}
+
 var increment = 4;
 
 soldier.prototype = {
@@ -85,8 +93,7 @@ soldier.prototype = {
     			}
     		}
     	}
-
-		this.draw(true);
+   		this.draw(true);
 	},
 
 	movedown : function(force){
@@ -103,7 +110,6 @@ soldier.prototype = {
     			}
     		}
     	}
-
 		this.draw(true);
 	},
 
@@ -173,6 +179,7 @@ window.onkeydown = function(e){
 	
 	switch(e.keyCode) {
 		case 87:
+			fb.push({func:"mu", teamid:teamid, id:ls.id, locx:ls.loc.x, locy:ls.loc.y, lookx:ls.lookpt.x, looky:ls.lookpt.y});
 			ls.moveup();
 			break;
 		case 83:
@@ -268,7 +275,7 @@ function commandloop() {
 		if(soldiers[i].waypoint.length) {
 			soldiers[i].lookat(soldiers[i].waypoint[0]);
 			soldiers[i].moveup();
-			fb.push({teamid:teamid, locx:soldiers[i].loc.x, locy:soldiers[i].loc.y});
+			fb.push({func:"mu", teamid:teamid, id:soldiers[i].id, locx:soldiers[i].loc.x, locy:soldiers[i].loc.y, lookx:soldiers[i].lookpt.x, looky:soldiers[i].lookpt.y});
 			//when we get to a waypoint
 			if(ptinrect(soldiers[i].waypoint[0], soldiers[i].rect)) {
 				console.log('hit waypoint');
@@ -291,19 +298,32 @@ function commandloop() {
 	}
 }
 
-var oldpt;
+var opp_soldiers = [];
 fb.on('child_added', function (snapshot) {
     var message = snapshot.val();
     if(message.teamid==teamid)
     	return;
 
-    if(oldpt)
-    	ctx.clearRect(oldpt.x, oldpt.y, 25,29);
-    
-    oldpt = makepoint(message.locx, message.locy);
-    console.log("trying to draw at "+oldpt.x +" "+oldpt.y);
+    var new_opp_soldier = true;
+    for(var i in opp_soldiers) {
+   		if (opp_soldiers[i].id==message.id) {
+   			opp_soldiers[i].loc = makepoint(message.locx, message.locy);
+   			opp_soldiers[i].lookat(makepoint(message.lookx, message.looky));
+   			//opp_soldiers[i].draw();
+   			if(message.func=="mu")
+   				opp_soldiers[i].moveup();
+   			else
+   				opp_soldiers[i].movedown();
 
-    ctx.drawImage(document.getElementById("soldier_walking_1"),message.locx,message.locy,25,29);
+   			new_opp_soldier = false;
+   			console.log('opp_soldier found, loc updated');
+   		} 	
+    }
+
+    if(new_opp_soldier) {
+    	opp_soldiers.push(makesoldier(message.teamid, message.id, message.locx, message.locy, message.lookx, message.looky));	   
+		console.log('new opp_soldier added');
+	}
 
   });
 
