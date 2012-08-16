@@ -450,14 +450,20 @@ function mainloop(){
 var started = false;
 function start(){
 	started=true;
+	instructions_element_id.hidden = false;
 	initcanvas();
 	initsquad();
 	mainloop();
 }
 
+var instructions_element_id; 
 //fb = new Firebase('http://gamma.firebase.com/Naiduv/');
 //when the page loads init your vars and get the canvas and context
 window.onload = function() {
+	//hide instructions until we start the game
+	instructions_element_id = document.getElementById('inctructions');
+	instructions_element_id.hidden = true;
+
 	fb = new Firebase('http://gamma.firebase.com/Naiduv/');
 }
 
