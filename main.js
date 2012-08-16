@@ -13,13 +13,13 @@ randfunc = function(){
 var soldier_count = 0;
 var timer;
 var ammo = 0;
-
+var teamid = Math.floor(Math.random()*10000);
 var idcount = 0;
 
 soldier = function(x, y){
 	this.selected = false;
 	this.id = Math.floor(Math.random()*10000);
-	this.teamid = 1;
+	this.teamid = teamid;
 	this.lookpt = makepoint(0,0);
 	this.lookangle = 0;
 	this.w = 25;
@@ -228,20 +228,6 @@ function handleclick(pt){
 	}
 }
 
-//this should be done on the server?
-// function tryhit(pt) {
-// 	//ctx.fillRect(pt.x,pt.y,4,4);
-// 	for(var i in soldiers) {
-// 		//dont shoot self or teammates
-// 		if(ls.id!=soldiers[i].id && ptinrect(pt,soldiers[i].rect) && ls.teamid!=soldiers[i].teamid) {
-// 			//soldiers[i].rect.stroke(ctx, '1', 'red');
-// 			soldiers[i].hit(35);
-// 			//soldiers[i].rect.stroke(ctx);
-// 			//ctx.fillRect(pt.x,pt.y,4,4);
-// 		}
-// 	}
-// }
-
 window.onresize = function()
 {
   c = document.getElementById("myCanvas");
@@ -271,38 +257,11 @@ function canvasdblclick(e){
 	ls = 0;
 }
 
-var soldiers = [];
-var num_soldiers = 4;
-var canvas_w;
-var canvas_h;
-var stop_running = false;
-//when the page loads init your vars and get the canvas and context
-window.onload = function() {
-	c = document.getElementById("myCanvas");
-	c.addEventListener('mousemove', canvasmousemove);
-	c.addEventListener('mouseup', canvasmouseup);
-	c.addEventListener('dblclick', canvasdblclick);
-
- 	ctx = c.getContext("2d");
-  	canvas_w = ctx.canvas.width  = window.innerWidth;
-  	canvas_h = ctx.canvas.height = window.innerHeight;
-
-	while(soldier_count<num_soldiers) {
-		ls = new soldier(100+Math.floor(Math.random()*(canvas_w-200)),100+Math.floor(Math.random()*(canvas_h-200)));
-		ls.draw();
-		soldiers.push(ls);
-		soldier_count++;
-	}
-
-	self.setInterval(function(){
-		if(!stop_running)
-			commandloop();
-			//randomloop();
-	}, 70);
-}
+var fb = new Firebase('http://gamma.firebase.com/Naiduv/');
 
 function commandloop() {
 	livesoldiers = 0;
+	locs = [];
 	for (var i in soldiers) {
 		if(ls==soldiers[i] || !soldiers[i].alive)
 			continue;
@@ -310,6 +269,7 @@ function commandloop() {
 		if(soldiers[i].waypoint.length) {
 			soldiers[i].lookat(soldiers[i].waypoint[0]);
 			soldiers[i].moveup();
+			locs.push(soldiers[i].loc);
 			//when we get to a waypoint
 			if(ptinrect(soldiers[i].waypoint[0], soldiers[i].rect)) {
 				console.log('hit waypoint');
@@ -326,11 +286,19 @@ function commandloop() {
 		}
 	}
 
+	fb.push({teamid:teamid, livesoldiers:livesoldiers, locs:locs});
 	if(livesoldiers<=0) {
 		stop_running = true;
 		document.location.reload(true);
 	}
 }
+
+fb.on('child_added', function (snapshot) {
+    var message = snapshot.val();
+    if(message.teamid==teamid)
+    	return;
+
+  });
 
 function randomloop()
 {
@@ -372,6 +340,36 @@ function randomloop()
 }
 
 
-function updatedashboard()
-{
+//STARTS HERE
+
+var soldiers = [];
+var num_soldiers = 3;
+var canvas_w;
+var canvas_h;
+var stop_running = false;
+//when the page loads init your vars and get the canvas and context
+window.onload = function() {
+	c = document.getElementById("myCanvas");
+	c.addEventListener('mousemove', canvasmousemove);
+	c.addEventListener('mouseup', canvasmouseup);
+	c.addEventListener('dblclick', canvasdblclick);
+
+ 	ctx = c.getContext("2d");
+  	canvas_w = ctx.canvas.width  = window.innerWidth;
+  	canvas_h = ctx.canvas.height = window.innerHeight;
+
+	while(soldier_count<num_soldiers) {
+		//ls = new soldier(100+Math.floor(Math.random()*(canvas_w-200)),100+Math.floor(Math.random()*(canvas_h-200)));
+		ls = new soldier((soldier_count*50)+50, (soldier_count)+canvas_h-50);
+		ls.draw();
+		soldiers.push(ls);
+		soldier_count++;
+	}
+
+	self.setInterval(function(){
+		if(!stop_running)
+			commandloop();
+			//randomloop();
+	}, 70);
 }
+
