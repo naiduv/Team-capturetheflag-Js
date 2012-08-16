@@ -208,6 +208,7 @@ function handleclick(pt){
 			// 	}
 			// }
 			ls = soldiers[i];
+			ls.waypoint = [];
 			newsoldierselected = true;
 			break;
 		}
