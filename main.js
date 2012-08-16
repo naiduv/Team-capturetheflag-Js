@@ -7,6 +7,7 @@ var canvas_w;
 var canvas_h;
 var stop_running = false;
 var fb;
+var fbgameref;
 
 //randomly returns a +1 or -1
 randfunc = function(){
@@ -185,7 +186,7 @@ window.onkeydown = function(e){
 	
 	switch(e.keyCode) {
 		case 87:
-			fb.push({func:"mu", teamid:teamid, id:ls.id, locx:ls.loc.x, locy:ls.loc.y, lookx:ls.lookpt.x, looky:ls.lookpt.y});
+			fbgameref.push({func:"mu", teamid:teamid, id:ls.id, locx:ls.loc.x, locy:ls.loc.y, lookx:ls.lookpt.x, looky:ls.lookpt.y});
 			ls.moveup();
 			break;
 		case 83:
@@ -199,9 +200,37 @@ window.onkeydown = function(e){
 				gameidinput.hidden = true;
 				gameidform.hidden = true;
 
-				initcanvas();
-				initsquad();
-				mainloop();
+				fbgameref = fb.child(gameid);
+				fbgameref.on('child_added', function (snapshot) {
+				    var message = snapshot.val();
+				    console.log('child_added');
+				    if(message.teamid==teamid)
+				    	return;
+
+				    var new_opp_soldier = true;
+				    for(var i in opp_soldiers) {
+				   		if (opp_soldiers[i].id==message.id) {
+				   			opp_soldiers[i].loc = makepoint(message.locx, message.locy);
+				   			opp_soldiers[i].lookat(makepoint(message.lookx, message.looky));
+				   			//opp_soldiers[i].draw();
+				   			if(message.func=="mu")
+				   				opp_soldiers[i].moveup();
+				   			else
+				   				opp_soldiers[i].movedown();
+
+				   			new_opp_soldier = false;
+				   			console.log('opp_soldier found, loc updated');
+				   		} 	
+				    }
+
+				    if(new_opp_soldier) {
+				    	opp_soldiers.push(makesoldier(message.teamid, message.id, message.locx, message.locy, message.lookx, message.looky));	   
+						console.log('new opp_soldier added');
+					}
+				});
+
+				//START RUNNING THE PROGRAM
+				start();
 			}
 			break;
 	}
@@ -292,7 +321,7 @@ function commandloop() {
 		if(soldiers[i].waypoint.length) {
 			soldiers[i].lookat(soldiers[i].waypoint[0]);
 			soldiers[i].moveup();
-			fb.push({func:"mu", teamid:teamid, id:soldiers[i].id, locx:soldiers[i].loc.x, locy:soldiers[i].loc.y, lookx:soldiers[i].lookpt.x, looky:soldiers[i].lookpt.y});
+			fbgameref.push({func:"mu", teamid:teamid, id:soldiers[i].id, locx:soldiers[i].loc.x, locy:soldiers[i].loc.y, lookx:soldiers[i].lookpt.x, looky:soldiers[i].lookpt.y});
 			//when we get to a waypoint
 			if(ptinrect(soldiers[i].waypoint[0], soldiers[i].rect)) {
 				console.log('hit waypoint');
@@ -316,38 +345,10 @@ function commandloop() {
 }
 
 //fb is changed after the gameid is entered!!!!! check onkeypress 13 (enter)
-fb = new Firebase('http://gamma.firebase.com/Naiduv/');
+// fb = new Firebase('http://gamma.firebase.com/Naiduv/' + gameid);
 
 
 var opp_soldiers = [];
-fb.on('child_changed', function (snapshot) {
-    var message = snapshot.val();
-    console.log('child_added');
-    if(message.teamid==teamid)
-    	return;
-
-    var new_opp_soldier = true;
-    for(var i in opp_soldiers) {
-   		if (opp_soldiers[i].id==message.id) {
-   			opp_soldiers[i].loc = makepoint(message.locx, message.locy);
-   			opp_soldiers[i].lookat(makepoint(message.lookx, message.looky));
-   			//opp_soldiers[i].draw();
-   			if(message.func=="mu")
-   				opp_soldiers[i].moveup();
-   			else
-   				opp_soldiers[i].movedown();
-
-   			new_opp_soldier = false;
-   			console.log('opp_soldier found, loc updated');
-   		} 	
-    }
-
-    if(new_opp_soldier) {
-    	opp_soldiers.push(makesoldier(message.teamid, message.id, message.locx, message.locy, message.lookx, message.looky));	   
-		console.log('new opp_soldier added');
-	}
-
-  });
 
 function randomloop()
 {
@@ -418,8 +419,17 @@ function mainloop(){
 	}, 70);
 }
 
+//THIS IS THE MAIN FUNCTION
+function start(){
+	initcanvas();
+	initsquad();
+	mainloop();
+}
+
+//fb = new Firebase('http://gamma.firebase.com/Naiduv/');
 //when the page loads init your vars and get the canvas and context
 window.onload = function() {
+	fb = new Firebase('http://gamma.firebase.com/Naiduv/');
 }
 
 
