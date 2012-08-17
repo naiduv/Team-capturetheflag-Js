@@ -17,9 +17,8 @@ canvas{
 /*	background:url(./images/dashboard/wasd.png);
 	background-repeat: no-repeat;
 	background-attachment:fixed;
-	background-position:left top;*/
-	background-color:;
-	z-order:0;
+	background-position:left top;
+	background-color:;*/
 }
 
 /*#background
@@ -59,7 +58,7 @@ canvas{
 }
 body 
 {
-	background-color: #FFFFFF;
+/*	background-color: #FFFFFF;*/
 	-webkit-user-select: none;
 }
 
@@ -73,7 +72,10 @@ body
 						<p>DOUBLECLICK - DESELECT UNIT AND SEND TO WAYPOINTS</p>
 					</div>
 
-<center><canvas id="top-canvas"></canvas></center>
+<!-- REMEMBER Z ORDER MATTER HERE, ALSO THE TOP ONE GETS THE MOUSE COMMANDS!!! -->
+<center><canvas id="bottom-canvas" style="z-index: 1"></canvas></center>
+<center><canvas id="top-canvas" style="z-index: 2"></canvas></center>
+
 <form id="gameidform" class="formfont" onSubmit="return false;">
 CHOOSE A UNIQUE GAME ID    <input type="text" class="inputform" id="gameid"></input><br />
 </form>

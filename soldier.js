@@ -128,7 +128,7 @@ soldier.prototype = {
 	kill: function(){
 		this.alive = false;
 		this.loc.x = 10000; //hack to make it go away
-		this.rect.clear(ctx0);
+		this.rect.clear(this.ctx);
 	},
 
 	lookat: function(pt){
@@ -149,11 +149,12 @@ soldier.prototype = {
 }
 
 
-function makesoldier(teamid, id,x,y,lookx,looky) {
+function makesoldier(ctx, teamid, id,x,y,lookx,looky) {
 	s = new soldier(x,y);
 	s.teamid = teamid;
 	s.id = id;
 	s.lookpt = makepoint(lookx, looky);
+	s.ctx = ctx;
 	return s;
 }
 

@@ -21,7 +21,7 @@ window.onkeydown = function(e){
 	if(ls==0)
 		return;
 
-	console.log('keydown' + e.keyCode);
+	// console.log('keydown' + e.keyCode);
 	
 	switch(e.keyCode) {
 		case 87:
@@ -45,9 +45,10 @@ window.onkeydown = function(e){
 
 
 				fbgameref = fb.child(gameid);
+
 				fbgameref.on('child_added', function (snapshot) {
 				    var message = snapshot.val();
-				    console.log('child_added');
+				    // console.log('child_added');
 				    if(message.teamid==teamid)
 				    	return;
 
@@ -64,14 +65,15 @@ window.onkeydown = function(e){
 				   			else if(message.func=="nm")
 				   				opp_soldiers[i].draw();
 
+
 				   			new_opp_soldier = false;
 				   			console.log('opp_soldier found, loc updated');
 				   		} 	
 				    }
 
 				    if(new_opp_soldier) {
-				    	opp_soldiers.push(makesoldier(message.teamid, message.id, message.locx, message.locy, message.lookx, message.looky));	   
-						console.log('new opp_soldier added');
+				    	opp_soldiers.push(makesoldier(ctx1, message.teamid, message.id, message.locx, message.locy, message.lookx, message.looky));	   
+						// console.log('new opp_soldier added');
 					}
 				});
 
@@ -109,7 +111,7 @@ function handleclick(pt){
 
 	//soldier was prev selected and user clicks on empty spot
 	if(wassoldierselected && !newsoldierselected) {
-		console.log('waypoint added')
+		// console.log('waypoint added')
 		ls.waypoint.push(pt);
 		//ctx0.fillStyle="#FF0000";
 		//ls = 0;
@@ -122,6 +124,11 @@ window.onresize = function()
   ctx0 = c.getContext("2d");
   ctx0.canvas.width  = window.innerWidth;
   ctx0.canvas.height = window.innerHeight;
+
+  c = document.getElementById("bottom-canvas");
+  ctx1 = c.getContext("2d");
+  ctx1.canvas.width  = window.innerWidth;
+  ctx1.canvas.height = window.innerHeight;
 }
 
 function canvasmousemove(e){
@@ -155,7 +162,7 @@ function canvasdblclick(e){
 	if(ls==0)
 		return;
 
-	console.log('dblclick');
+	// console.log('dblclick');
 	ls = 0;
 }
 
@@ -171,14 +178,14 @@ function commandloop() {
 			fbgameref.push({func:"mu", teamid:teamid, id:soldiers[i].id, locx:soldiers[i].loc.x, locy:soldiers[i].loc.y, lookx:soldiers[i].lookpt.x, looky:soldiers[i].lookpt.y});
 			//when we get to a waypoint
 			if(ptinrect(soldiers[i].waypoint[0], soldiers[i].rect)) {
-				console.log('hit waypoint');
+				// console.log('hit waypoint');
 				//ctx0.clearRect(soldiers[i].waypoint.x, soldiers[i].waypoint.y,5,5);
 				//remove the waypoint
 				soldiers[i].waypoint.shift();
 				//point the soldier in the new waypoint dir, if it exists
 				if(soldiers[i].waypoint.length) {
 					//look at next waypoint
-					console.log('look at next waypoint');
+					// console.log('look at next waypoint');
 					soldiers[i].lookat(soldiers[i].waypoint[0]);
 				}
 			}
@@ -251,8 +258,8 @@ function initcanvas(){
 	c.addEventListener('mouseup', canvasmouseup);
 	c.addEventListener('dblclick', canvasdblclick);
 
-	// c = document.getElementById("bottom-canvas");
-	//  = c.getContext("2d");
+	c = document.getElementById("bottom-canvas");
+	ctx1 = c.getContext("2d");
 }
 
 //initialize the units
@@ -278,15 +285,17 @@ function mainloop(){
 var started = false;
 function start(){
 	started=true;
+
+	//unhide the instructions
 	instructions_element_id.hidden = false;
+
+	//init the canvas, squad and start ai
 	initcanvas();
 	initsquad();
 	mainloop();
 }
 
 var instructions_element_id; 
-//fb = new Firebase('http://gamma.firebase.com/Naiduv/');
-//when the page loads init your vars and get the canvas and context
 window.onload = function() {
 	//hide instructions until we start the game
 	instructions_element_id = document.getElementById('inctructions');
