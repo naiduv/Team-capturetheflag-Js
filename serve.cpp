@@ -77,10 +77,10 @@ int main( int argc, char *argv[] )
     char verhead[] = "Sec-WebSocket-Version: ";
     char* ptr2 = strstr(buffer, verhead);
 
-    int key_len = strlen(ptr1)-strlen(ptr2)-strlen(keyhead);
+    int key_len = strlen(ptr1)-strlen(ptr2)-strlen(keyhead)-2;
 
     char key[1000];
-    strncpy(key, ptr1+strlen(keyhead), key_len-2);
+    strncpy(key, ptr1+strlen(keyhead), key_len);
     key[key_len-2] = '\0';
     cout<<"\nkey: "<<key;
     cout<<"<<key";
@@ -94,9 +94,13 @@ int main( int argc, char *argv[] )
     sha1::calc(key, strlen(key), hash);
     cout<<"\nhash : "<<hash;
 
-    char response[] = "HTTP/1.1 101 Web Socket Protocol Handshake\nUpgrade: WebSocket\nConnection: Upgrade\nWebSocket-Origin: http://www.mailerdemon.com\nWebSocket-Location: ws://www.mailerdemon.com/Team-capturetheflag-Js/";
+    string keystr(key);
+    string response = "HTTP/1.1 101 Switching Protocols\r\n";
+    response.append("Upgrade: websocket\r\n");
+    response.append("Connection: Upgrade\r\n");
+    response.append("Sec-WebSocket-Accept: " + keystr + "\r\n\r\n");
 
-    n = write(newsockfd,response,strlen(response));
+    n = write(newsockfd,response.c_str(),response.length());
     if (n < 0) {
       cout<<"\nERROR writing to socket";
       return(0);
