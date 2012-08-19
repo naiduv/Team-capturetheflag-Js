@@ -77,13 +77,13 @@ int main( int argc, char *argv[] )
     char verhead[] = "Sec-WebSocket-Version: ";
     char* ptr2 = strstr(buffer, verhead);
 
-    int key_len = strlen(ptr1)-strlen(ptr2)-strlen(keyhead)-2;
+    int key_len = strlen(ptr1)-strlen(ptr2)-strlen(keyhead)-1;
 
     char key[1000];
     strncpy(key, ptr1+strlen(keyhead), key_len);
-    key[key_len-2] = '\0';
+    key[key_len-1] = '\0';
     cout<<"\nkey: "<<key;
-    cout<<"<<key";
+    cout<<"[end key]";
 
     char guid[] = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
     strcat(key, guid);
@@ -93,12 +93,16 @@ int main( int argc, char *argv[] )
     unsigned char hash[20];
     sha1::calc(key, strlen(key), hash);
     cout<<"\nhash : "<<hash;
-
-    string keystr(key);
+ 
+    const string s(reinterpret_cast<char*>(hash));
+    string keystr  = base64_encode(reinterpret_cast<const unsigned char*>(s.c_str()), s.length());
+    
     string response = "HTTP/1.1 101 Switching Protocols\r\n";
     response.append("Upgrade: websocket\r\n");
     response.append("Connection: Upgrade\r\n");
     response.append("Sec-WebSocket-Accept: " + keystr + "\r\n\r\n");
+
+    cout<<"\n\nresponse:\n"<<response;
 
     n = write(newsockfd,response.c_str(),response.length());
     if (n < 0) {
@@ -106,10 +110,6 @@ int main( int argc, char *argv[] )
       return(0);
     }
 
-    cout<<response;
-
-	      // close(newsockfd);
-	      //cout<<"\n closing socket \n";
   }
 
   return 0; 
