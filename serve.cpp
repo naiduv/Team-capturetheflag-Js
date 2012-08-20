@@ -11,6 +11,12 @@
 #include <pthread.h>
 
 using namespace std;
+class game
+{
+  //each game has 2 sockets
+  socklen_t sockets[2];
+  string gameid;
+};
 
 void* listen_loop(void *ptr);
 void* read_keyboard_loop(void *ptr);
