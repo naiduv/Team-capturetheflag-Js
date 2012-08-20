@@ -66,15 +66,16 @@ void* recv_loop(void *ptr)
   cout<<"\n entering recv_loop";
   
   while(!g_force_exit){
+    
     if(newsockfd){
-      char rb[24];
-      bzero(rb, 24);
-      recv(newsockfd, rb, 24, 0);
-      
-      //0 byte
-      bool fin = (bool)(rb[0] >> 7);
+      char *rb;
+      //fin
+      recv(newsockfd, rb, 1, 0);
+      bool fin = (bool)(*rb & 0x80);
       cout<<"\n fin: "<<fin;
-      char opcode = rb[0] & 0x0F;
+     
+      char opcode = *rb & 0x0F;
+      
       if(opcode == 0x01)
 	cout<<"\n opcode: text frame";
       else if(opcode == 0x08)
@@ -82,11 +83,42 @@ void* recv_loop(void *ptr)
       else
 	cout<<"\n opcode: not handled";
 
-      //1 byte
-      char length = rb[1] & 0x7F;
-      cout<<"\n length: "<< (rb[1]&0x7f);
+      char length = *rb & 0x7F;
+      cout<<"\n length: "<< (*rb&0x7f)<<"\n ** done";
 
       cout<<"\n** done read **";
+ /*
+      //0 byte
+     
+      
+     
+
+      //1 byte
+
+      
+      //10,11,12,are the mask byte
+      char mask[4];
+      bzero(mask, 4);
+      mask[0]=rb[10];
+      mask[1]=rb[11];
+      mask[2]=rb[12];
+      mask[3]=rb[13];
+
+      //reading data
+      char data[100];
+      bzero(data, 100);
+      int count = 14;
+      for (int i = 0; i < length; i++) {
+	  data[i] = rb[count] ^ mask[i % 4];
+          count++;
+      }
+      //data[length]='\0';
+      cout<<"\n data0: "<<data[0]<<"\n";
+      cout<<"\n data0: "<<data[1]<<"\n";
+      cout<<"\n data0: "<<data[2]<<"\n";
+
+
+      */
     }
   }
    
