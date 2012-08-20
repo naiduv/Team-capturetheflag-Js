@@ -36,10 +36,9 @@ bool g_close_socks = false;
 void* read_keyboard_loop(void *ptr)
 {
   cout<<"\n entering read keyb loop";
-  int input=1;
-  while(input!=0){
+  string input="empty";
+  while(strcmp(input, "exit")!=0){
     cin>>input;
-    cout<<"\n echo:"<<input<<"\n";
   }
   g_close_socks = true;
   cout<<"\n exiting read_keyboard_loop! enter to complete";
