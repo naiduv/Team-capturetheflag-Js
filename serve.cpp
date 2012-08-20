@@ -9,6 +9,7 @@
 #include "./sha1.h"
 #include "./base64.h"
 #include <pthread.h>
+#include <unistd.h>
 
 using namespace std;
 class game
@@ -158,6 +159,16 @@ void* listen_loop(void *ptr)
       cout<<"\nERROR writing to socket";
       return(0);
     }
+    cout<<"\n about to sleep";
+    sleep(3);
+    cout<<"\n awake - about to send";
+    char hello[] = "hello";
+    send(newsockfd, hello, strlen(hello), 0);
+    cout<<"\n send completed";
+    sleep(3);
+    char rb[1000];
+    recv(newsockfd, rb, 100, 0);
+    cout<<"\n recv completed";
 
   }
 
