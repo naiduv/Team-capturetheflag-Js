@@ -44,9 +44,18 @@ window.onkeydown = function(e){
 				//gameidform.hidden = true;
 				gameidform.innerText = "YOUR GAMEID IS " + gameid + ". INVITE FRIENDS TO JOIN!";
 
-				Socket = new WebSocket("ws://www.mailerdemon.com/Team-capturetheflag-Js/serve.php");
-				Socket.onopen() = function() {
-					alert('conn established');
+				Socket = new WebSocket("ws://www.mailerdemon.com:5001");
+				Socket.onopen = function() {
+					console.log('conn established');
+				}
+				Socket.onmessage = function (e) {
+  					console.log('Server: ' + e.data);
+				};
+				Socket.onclose = function () {
+  					console.log('conn was closed');
+				};
+				Socket.onerror = function() {
+					console.log('conn error');
 				}
 
 
