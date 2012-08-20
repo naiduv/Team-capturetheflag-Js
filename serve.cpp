@@ -69,7 +69,7 @@ void* recv_loop(void *ptr)
     
     if(newsockfd){
       char *rb;
-      //fin
+      //byte 0
       recv(newsockfd, rb, 1, 0);
       bool fin = (bool)(*rb & 0x80);
       cout<<"\n fin: "<<fin;
@@ -82,11 +82,15 @@ void* recv_loop(void *ptr)
 	cout<<"\n opcode: connection close";
       else
 	cout<<"\n opcode: not handled";
-
+     
+      //byte 1
+      recv(newsockfd, rb, 1, 0);
       char length = *rb & 0x7F;
       cout<<"\n length: "<< (*rb&0x7f)<<"\n ** done";
 
       cout<<"\n** done read **";
+
+      recv(newsockfd
  /*
       //0 byte
      
