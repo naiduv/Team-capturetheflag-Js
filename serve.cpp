@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <sys/types.h> 
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -36,8 +37,9 @@ bool g_close_socks = false;
 void* read_keyboard_loop(void *ptr)
 {
   cout<<"\n entering read keyb loop";
-  string input="empty";
-  while(strcmp(input, "exit")!=0){
+  string input = "empty";
+  string exit = "exit";
+  while(input!=exit){
     cin>>input;
   }
   g_close_socks = true;
@@ -70,6 +72,8 @@ void* listen_loop(void *ptr)
   serv_addr.sin_port = htons(portno);
  
   /* Now bind the host address using bind() call.*/
+  int optval = 1;
+  setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
   if (bind(sockfd, (struct sockaddr *) &serv_addr,
 	   sizeof(serv_addr)) < 0)
     {
@@ -82,6 +86,7 @@ void* listen_loop(void *ptr)
    */
   while(1) {
     cout<<"\n***New listen cycle***\n";
+    
     listen(sockfd,5);
     clilen = sizeof(cli_addr);
 
@@ -158,9 +163,13 @@ void* close_socks_loop(void *ptr)
   bool run = true;
   while(run){
     if(g_close_socks){
+      shutdown(newsockfd, 2);
       close(newsockfd);
+      shutdown(sockfd, 2);
+      close(sockfd);
       run = false;
     }
   }
   cout<<"\n closed sockets. leaving close_socks_loop";
+  exit(0);
 }
