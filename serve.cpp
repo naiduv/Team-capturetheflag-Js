@@ -7,12 +7,51 @@
 #include <fstream>
 #include "./sha1.h"
 #include "./base64.h"
+#include <pthread.h>
 
 using namespace std;
 
+void* listen_loop(void *ptr);
+void* read_keyboard_loop(void *ptr);
+void* close_socks_loop(void *ptr);
+
 int main( int argc, char *argv[] )
 {
-  socklen_t sockfd, newsockfd, portno, clilen;
+  pthread_t listen_thread;
+  pthread_t read_keyboard_thread;
+  pthread_t close_socks_thread;
+
+  int listenret = pthread_create(&listen_thread, NULL, listen_loop, (void*)NULL);
+  int readkbret = pthread_create(&read_keyboard_thread, NULL, read_keyboard_loop, (void*)NULL);
+  int closesockret = pthread_create(&close_socks_thread, NULL, close_socks_loop, (void*)NULL);
+  cout<<"\n thread create completed";
+
+  pthread_join(listen_thread, NULL);
+  pthread_join(read_keyboard_thread, NULL);
+  pthread_join(close_socks_thread, NULL);
+
+}
+
+bool g_close_socks = false;
+void* read_keyboard_loop(void *ptr)
+{
+  cout<<"\n entering read keyb loop";
+  int input=1;
+  while(input!=0){
+    cin>>input;
+    cout<<"\n echo:"<<input<<"\n";
+  }
+  g_close_socks = true;
+  cout<<"\n exiting read_keyboard_loop! enter to complete";
+  cin>>input;
+}
+
+socklen_t sockfd, newsockfd, portno, clilen;
+void* listen_loop(void *ptr)
+{
+  cout<<"\n entering listen loop";
+
+  //  socklen_t sockfd, newsockfd, portno, clilen;
   char buffer[1024];
   struct sockaddr_in serv_addr, cli_addr;
   int  n;
@@ -113,4 +152,16 @@ int main( int argc, char *argv[] )
   }
 
   return 0; 
+}
+
+void* close_socks_loop(void *ptr)
+{
+  bool run = true;
+  while(run){
+    if(g_close_socks){
+      close(newsockfd);
+      run = false;
+    }
+  }
+  cout<<"\n closed sockets. leaving close_socks_loop";
 }
