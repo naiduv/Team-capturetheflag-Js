@@ -28,6 +28,7 @@ void* recv_loop(void *ptr);
 
 int main( int argc, char *argv[] )
 {
+  cout<<"\n sizeof char : "<<sizeof(char);
   pthread_t listen_thread;
   pthread_t read_keyboard_thread;
   pthread_t close_socks_thread; 
@@ -66,10 +67,26 @@ void* recv_loop(void *ptr)
   
   while(!g_force_exit){
     if(newsockfd){
-      char rb[1000];
-      recv(newsockfd, rb, 100, 0);
-      rb[100]='\0';
-      cout<<"\n received: "<<rb;
+      char rb[24];
+      bzero(rb, 24);
+      recv(newsockfd, rb, 24, 0);
+      
+      //0 byte
+      bool fin = (bool)(rb[0] >> 7);
+      cout<<"\n fin: "<<fin;
+      char opcode = rb[0] & 0x0F;
+      if(opcode == 0x01)
+	cout<<"\n opcode: text frame";
+      else if(opcode == 0x08)
+	cout<<"\n opcode: connection close";
+      else
+	cout<<"\n opcode: not handled";
+
+      //1 byte
+      char length = rb[1] & 0x7F;
+      cout<<"\n length: "<< (rb[1]&0x7f);
+
+      cout<<"\n** done read **";
     }
   }
    
