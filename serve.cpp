@@ -12,6 +12,8 @@
 #include <unistd.h>
 
 using namespace std;
+socklen_t sockfd, newsockfd, portno, clilen;
+
 class game
 {
   //each game has 2 sockets
@@ -22,25 +24,29 @@ class game
 void* listen_loop(void *ptr);
 void* read_keyboard_loop(void *ptr);
 void* close_socks_loop(void *ptr);
+void* recv_loop(void *ptr);
 
 int main( int argc, char *argv[] )
 {
   pthread_t listen_thread;
   pthread_t read_keyboard_thread;
-  pthread_t close_socks_thread;
+  pthread_t close_socks_thread; 
+  pthread_t recv_thread;
+
 
   int listenret = pthread_create(&listen_thread, NULL, listen_loop, (void*)NULL);
   int readkbret = pthread_create(&read_keyboard_thread, NULL, read_keyboard_loop, (void*)NULL);
   int closesockret = pthread_create(&close_socks_thread, NULL, close_socks_loop, (void*)NULL);
+  int recvret = pthread_create(&recv_thread, NULL, recv_loop, (void*)NULL);
   cout<<"\n thread create completed";
 
   pthread_join(listen_thread, NULL);
   pthread_join(read_keyboard_thread, NULL);
   pthread_join(close_socks_thread, NULL);
-
+  pthread_join(recv_thread, NULL);
 }
 
-bool g_close_socks = false;
+bool g_force_exit = false;
 void* read_keyboard_loop(void *ptr)
 {
   cout<<"\n entering read keyb loop";
@@ -49,12 +55,26 @@ void* read_keyboard_loop(void *ptr)
   while(input!=exit){
     cin>>input;
   }
-  g_close_socks = true;
+  g_force_exit = true;
   cout<<"\n exiting read_keyboard_loop! enter to complete";
   cin>>input;
 }
 
-socklen_t sockfd, newsockfd, portno, clilen;
+void* recv_loop(void *ptr)
+{
+  cout<<"\n entering recv_loop";
+  
+  while(!g_force_exit){
+    if(newsockfd){
+      char rb[1000];
+      recv(newsockfd, rb, 100, 0);
+      rb[100]='\0';
+      cout<<"\n received: "<<rb;
+    }
+  }
+   
+}
+
 void* listen_loop(void *ptr)
 {
   cout<<"\n entering listen loop";
@@ -159,17 +179,14 @@ void* listen_loop(void *ptr)
       cout<<"\nERROR writing to socket";
       return(0);
     }
-    cout<<"\n about to sleep";
-    sleep(3);
-    cout<<"\n awake - about to send";
-    char hello[] = "hello";
-    send(newsockfd, hello, strlen(hello), 0);
-    cout<<"\n send completed";
-    sleep(3);
-    char rb[1000];
-    recv(newsockfd, rb, 100, 0);
-    cout<<"\n recv completed";
 
+    //cout<<"\n about to sleep";
+    //sleep(3);
+    //cout<<"\n awake - about to send";
+    //char hello[] = "hello";
+    //send(newsockfd, hello, strlen(hello), 0);
+    //cout<<"\n send completed";
+    //sleep(3);
   }
 
   return 0; 
@@ -177,9 +194,10 @@ void* listen_loop(void *ptr)
 
 void* close_socks_loop(void *ptr)
 {
+  cout<<"\n entering close_socks loop";
   bool run = true;
   while(run){
-    if(g_close_socks){
+    if(g_force_exit){
       shutdown(newsockfd, 2);
       close(newsockfd);
       shutdown(sockfd, 2);
