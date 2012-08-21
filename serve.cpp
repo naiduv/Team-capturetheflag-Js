@@ -101,10 +101,10 @@ void* recv_loop(void *ptr)
       mask[3] = *rb+3;
 
       //byte 14 - all -> payload 
-      char *data;
+      int data;
       for (int i = 0; i < length; i++) {
         recv(newsockfd, rb, 1, 0);
-        data = (char)(*rb ^ mask[i % 4]);
+        data = (*rb ^ mask[i % 4]);
         cout<<"\n data: "<<data;
       }
 
