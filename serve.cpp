@@ -96,15 +96,15 @@ void* recv_loop(void *ptr)
       recv(newsockfd, rb, 4, 0);
       char mask[4];
       mask[0] = *rb;
-      mask[0] = *rb+1;
-      mask[0] = *rb+2;
-      mask[0] = *rb+3;
+      mask[1] = *rb+1;
+      mask[2] = *rb+2;
+      mask[3] = *rb+3;
 
       //byte 14 - all -> payload 
       char *data;
       for (int i = 0; i < length; i++) {
         recv(newsockfd, rb, 1, 0);
-        data = *rb ^ mask[i % 4];
+        data = (char)(*rb ^ mask[i % 4]);
         cout<<"\n data: "<<data;
       }
 
