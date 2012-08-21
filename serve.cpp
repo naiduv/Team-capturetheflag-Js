@@ -69,7 +69,8 @@ void* recv_loop(void *ptr)
     
     if(newsockfd){
       char *rb;
-      //byte 0
+      
+      //byte 0 -> fin, opcode
       recv(newsockfd, rb, 1, 0);
       bool fin = (bool)(*rb & 0x80);
       cout<<"\n fin: "<<fin;
@@ -77,52 +78,37 @@ void* recv_loop(void *ptr)
       char opcode = *rb & 0x0F;
       
       if(opcode == 0x01)
-	cout<<"\n opcode: text frame";
+        cout<<"\n opcode: text frame";
       else if(opcode == 0x08)
-	cout<<"\n opcode: connection close";
+        cout<<"\n opcode: connection close";
       else
-	cout<<"\n opcode: not handled";
+        cout<<"\n opcode: not handled";
      
-      //byte 1
+      //byte 1 -> ismask, payload len
       recv(newsockfd, rb, 1, 0);
       char length = *rb & 0x7F;
-      cout<<"\n length: "<< (*rb&0x7f)<<"\n ** done";
+      cout<<"\n length: "<<(*rb&0x7f);
 
-      cout<<"\n** done read **";
+      //byte 2-9 -> check 2-7 for extended payload
+      recv(newsockfd, rb, 8, 0);
 
-      recv(newsockfd
- /*
-      //0 byte
-     
-      
-     
-
-      //1 byte
-
-      
-      //10,11,12,are the mask byte
+      //byte 10-13 -> masking
+      recv(newsockfd, rb, 4, 0);
       char mask[4];
-      bzero(mask, 4);
-      mask[0]=rb[10];
-      mask[1]=rb[11];
-      mask[2]=rb[12];
-      mask[3]=rb[13];
+      mask[0] = *rb;
+      mask[0] = *rb+1;
+      mask[0] = *rb+2;
+      mask[0] = *rb+3;
 
-      //reading data
-      char data[100];
-      bzero(data, 100);
-      int count = 14;
+      //byte 14 - all -> payload 
+      char *data;
       for (int i = 0; i < length; i++) {
-	  data[i] = rb[count] ^ mask[i % 4];
-          count++;
+        recv(newsockfd, rb, 1, 0);
+        data = rb ^ mask[i % 4];
+        cout<<"\n data: "<<data;
       }
-      //data[length]='\0';
-      cout<<"\n data0: "<<data[0]<<"\n";
-      cout<<"\n data0: "<<data[1]<<"\n";
-      cout<<"\n data0: "<<data[2]<<"\n";
 
-
-      */
+      cout<<"\n **read done**\n\n"
     }
   }
    
