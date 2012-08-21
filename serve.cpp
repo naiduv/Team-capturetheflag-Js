@@ -47,14 +47,27 @@ int main( int argc, char *argv[] )
   pthread_join(recv_thread, NULL);
 }
 
+void send_msg()
+{
+  char buffer[10];
+  buffer[0] = 0x81; //fin + opcode 1 (text frame)
+  buffer[1] = 0x01; //payload size = 1
+  buffer[2] = 0x32; //0x32 is 50 ascii = number 2
+ 
+  send(newsockfd, buffer, strlen(buffer), 0);
+}
+
 bool g_force_exit = false;
 void* read_keyboard_loop(void *ptr)
 {
   cout<<"\n entering read keyb loop";
   string input = "empty";
   string exit = "exit";
+  string send = "send";
   while(input!=exit){
     cin>>input;
+    if(input==send)
+      send_msg(); 
   }
   g_force_exit = true;
   cout<<"\n exiting read_keyboard_loop! enter to complete";
