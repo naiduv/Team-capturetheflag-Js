@@ -104,11 +104,11 @@ void* recv_loop(void *ptr)
       char *data;
       for (int i = 0; i < length; i++) {
         recv(newsockfd, rb, 1, 0);
-        data = rb ^ mask[i % 4];
+        data = *rb ^ mask[i % 4];
         cout<<"\n data: "<<data;
       }
 
-      cout<<"\n **read done**\n\n"
+      cout<<"\n **read done**\n\n";
     }
   }
    
