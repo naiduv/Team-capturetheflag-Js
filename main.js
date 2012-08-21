@@ -6,8 +6,8 @@ var num_soldiers = 3;
 var canvas_w;
 var canvas_h;
 var stop_running = false;
-var fb;
-var fbgameref;
+// var fb;
+// var fbgameref;
 var ctx0;
 var ctx1;
 var soldier_count = 0;
@@ -16,6 +16,7 @@ var ammo = 0;
 var teamid = Math.floor(Math.random()*10000);
 var idcount = 0;
 var increment = 4;
+var Socket;
 
 window.onkeydown = function(e){
 	if(ls==0)
@@ -26,12 +27,12 @@ window.onkeydown = function(e){
 	switch(e.keyCode) {
 		case 87:
 			if(!started) return;
-			fbgameref.push({func:"mu", teamid:teamid, id:ls.id, locx:ls.loc.x, locy:ls.loc.y, lookx:ls.lookpt.x, looky:ls.lookpt.y});
+			//fbgameref.push({func:"mu", teamid:teamid, id:ls.id, locx:ls.loc.x, locy:ls.loc.y, lookx:ls.lookpt.x, looky:ls.lookpt.y});
 			ls.moveup();
 			break;
 		case 83:
 			if(!started) return;
-			fbgameref.push({func:"md", teamid:teamid, id:ls.id, locx:ls.loc.x, locy:ls.loc.y, lookx:ls.lookpt.x, looky:ls.lookpt.y});		
+			//fbgameref.push({func:"md", teamid:teamid, id:ls.id, locx:ls.loc.x, locy:ls.loc.y, lookx:ls.lookpt.x, looky:ls.lookpt.y});		
 			ls.movedown();
 			break;
 		case 13:
@@ -43,39 +44,53 @@ window.onkeydown = function(e){
 				//gameidform.hidden = true;
 				gameidform.innerText = "YOUR GAMEID IS " + gameid + ". INVITE FRIENDS TO JOIN!";
 
-
-				fbgameref = fb.child(gameid);
-
-				fbgameref.on('child_added', function (snapshot) {
-				    var message = snapshot.val();
-				    // console.log('child_added');
-				    if(message.teamid==teamid)
-				    	return;
-
-				    var new_opp_soldier = true;
-				    for(var i in opp_soldiers) {
-				   		if (opp_soldiers[i].id==message.id) {
-				   			opp_soldiers[i].loc = makepoint(message.locx, message.locy);
-				   			opp_soldiers[i].lookat(makepoint(message.lookx, message.looky));
-				   			//opp_soldiers[i].draw();
-				   			if(message.func=="mu")
-				   				opp_soldiers[i].moveup();
-				   			else if(message.func=="md")
-				   				opp_soldiers[i].movedown();
-				   			else if(message.func=="nm")
-				   				opp_soldiers[i].draw();
+				Socket = new WebSocket("ws://www.mailerdemon.com:5001");
+				Socket.onopen = function() {
+					console.log('conn established');
+				}
+				Socket.onmessage = function (e) {
+  					console.log('Server: ' + e.data);
+				};
+				Socket.onclose = function () {
+  					console.log('conn was closed');
+				};
+				Socket.onerror = function() {
+					console.log('conn error');
+				}
 
 
-				   			new_opp_soldier = false;
-				   			console.log('opp_soldier found, loc updated');
-				   		} 	
-				    }
+				//fbgameref = fb.child(gameid);
 
-				    if(new_opp_soldier) {
-				    	opp_soldiers.push(makesoldier(ctx1, message.teamid, message.id, message.locx, message.locy, message.lookx, message.looky));	   
-						// console.log('new opp_soldier added');
-					}
-				});
+				// fbgameref.on('child_added', function (snapshot) {
+				//     var message = snapshot.val();
+				//     // console.log('child_added');
+				//     if(message.teamid==teamid)
+				//     	return;
+
+				//     var new_opp_soldier = true;
+				//     for(var i in opp_soldiers) {
+				//    		if (opp_soldiers[i].id==message.id) {
+				//    			opp_soldiers[i].loc = makepoint(message.locx, message.locy);
+				//    			opp_soldiers[i].lookat(makepoint(message.lookx, message.looky));
+				//    			//opp_soldiers[i].draw();
+				//    			if(message.func=="mu")
+				//    				opp_soldiers[i].moveup();
+				//    			else if(message.func=="md")
+				//    				opp_soldiers[i].movedown();
+				//    			else if(message.func=="nm")
+				//    				opp_soldiers[i].draw();
+
+
+				//    			new_opp_soldier = false;
+				//    			console.log('opp_soldier found, loc updated');
+				//    		} 	
+				//     }
+
+				//     if(new_opp_soldier) {
+				//     	opp_soldiers.push(makesoldier(ctx1, message.teamid, message.id, message.locx, message.locy, message.lookx, message.looky));	   
+				// 		// console.log('new opp_soldier added');
+				// 	}
+				// });
 
 				//START RUNNING THE PROGRAM
 				start();
@@ -175,10 +190,9 @@ function commandloop() {
 		if(soldiers[i].waypoint.length) {
 			soldiers[i].lookat(soldiers[i].waypoint[0]);
 			soldiers[i].moveup();
-			fbgameref.push({func:"mu", teamid:teamid, id:soldiers[i].id, locx:soldiers[i].loc.x, locy:soldiers[i].loc.y, lookx:soldiers[i].lookpt.x, looky:soldiers[i].lookpt.y});
+			//fbgameref.push({func:"mu", teamid:teamid, id:soldiers[i].id, locx:soldiers[i].loc.x, locy:soldiers[i].loc.y, lookx:soldiers[i].lookpt.x, looky:soldiers[i].lookpt.y});
 			//when we get to a waypoint
-			if(ptinrect(soldiers[i].waypoint[0], soldiers[i].rect)) {
-				// console.log('hit waypoint');
+			if(ptinrect(soldiers[i].waypoint[0], soldiers[i].rect)) {				// console.log('hit waypoint');
 				//ctx0.clearRect(soldiers[i].waypoint.x, soldiers[i].waypoint.y,5,5);
 				//remove the waypoint
 				soldiers[i].waypoint.shift();
@@ -192,7 +206,7 @@ function commandloop() {
 		} else {
 			//if no commands just look around so that we are not cleaned out
 			soldiers[i].lookat(makepoint(soldiers[i].lookpt.x+myrand(1), soldiers[i].lookpt.y+myrand(1)));
-			fbgameref.push({func:"nm", teamid:teamid, id:soldiers[i].id, locx:soldiers[i].loc.x, locy:soldiers[i].loc.y, lookx:soldiers[i].lookpt.x, looky:soldiers[i].lookpt.y});
+			//fbgameref.push({func:"nm", teamid:teamid, id:soldiers[i].id, locx:soldiers[i].loc.x, locy:soldiers[i].loc.y, lookx:soldiers[i].lookpt.x, looky:soldiers[i].lookpt.y});
 			soldiers[i].draw();
 			// console.log('looking around' + Math.random()*1000);
 		}
@@ -301,7 +315,7 @@ window.onload = function() {
 	instructions_element_id = document.getElementById('inctructions');
 	instructions_element_id.hidden = true;
 
-	fb = new Firebase('http://gamma.firebase.com/Naiduv/');
+	//fb = new Firebase('http://gamma.firebase.com/Naiduv/');
 }
 
 
