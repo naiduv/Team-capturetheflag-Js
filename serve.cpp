@@ -68,7 +68,7 @@ void* recv_loop(void *ptr)
   while(!g_force_exit){
     
     if(newsockfd){
-      char *rb;
+      char rb[10];
       
       //byte 0 -> fin, opcode
       recv(newsockfd, rb, 1, 0);
@@ -86,28 +86,37 @@ void* recv_loop(void *ptr)
      
       //byte 1 -> ismask, payload len
       recv(newsockfd, rb, 1, 0);
-      char length = *rb & 0x7F;
-      cout<<"\n length: "<<(*rb&0x7f);
+      int length = *rb & 0x7F;
+      cout<<"\n length: "<<length;
 
       //byte 2-9 -> check 2-7 for extended payload
-      recv(newsockfd, rb, 8, 0);
+      //recv(newsockfd, rb, 8, 0);
 
+      cout<<"\n getting mask\n";
       //byte 10-13 -> masking
-      recv(newsockfd, rb, 4, 0);
       char mask[4];
-      mask[0] = *rb;
-      mask[1] = *rb+1;
-      mask[2] = *rb+2;
-      mask[3] = *rb+3;
+      for(int i=0; i<4;i++){
+	recv(newsockfd, rb, 1, 0);
+	mask[i] = *rb;
+      }
+ 
+
+      cout<<"\n mask: "<<mask;
 
       //byte 14 - all -> payload 
       int data;
+      char str[100];
       for (int i = 0; i < length; i++) {
         recv(newsockfd, rb, 1, 0);
+	//cout<<"\n payload rb: "<<(*rb^mask[i%4]);
         data = (*rb ^ mask[i % 4]);
-        cout<<"\n data: "<<data;
+	//cout<<"\n data: "<<data;
+	str[i]=(char)data;
+	//sprintf(str,"%d",data);
       }
-
+      str[length]='\0';
+      cout<<"\n datastr: "<<str;
+      
       cout<<"\n **read done**\n\n";
     }
   }
