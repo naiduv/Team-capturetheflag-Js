@@ -16,10 +16,36 @@ socklen_t sockfd, newsockfd, portno, clilen;
 
 class game
 {
+private:
   //each game has 2 sockets
-  socklen_t sockets[2];
-  string gameid;
+  socklen_t *_sockets[2];
+  string _gameid;
+  int _num_socks; 
+public:
+  game(string gameid):_gameid(gameid),_num_socks(0) {}
+  void addsocket(socklen_t *sock) { 
+    if(_num_socks==2) {
+      cout<<"\n game is full";
+      return;
+    }
+    _sockets[_num_socks]= sock; 
+    _num_socks++; 
+  }
 };
+
+#define MAX_GAMES 10
+#define MAX_SOCKETS 25
+game *gamelist[MAX_GAMES];
+socklen_t socketlist[MAX_SOCKETS];
+int g_numgames = 0;
+
+void creategame()
+{
+  game *new_game = new game(0);
+  gamelist[g_numgames] = new_game;
+  g_numgames++;
+  cout<<"\n new game created";
+}
 
 void* listen_loop(void *ptr);
 void* read_keyboard_loop(void *ptr);
@@ -33,7 +59,6 @@ int main( int argc, char *argv[] )
   pthread_t read_keyboard_thread;
   pthread_t close_socks_thread; 
   pthread_t recv_thread;
-
 
   int listenret = pthread_create(&listen_thread, NULL, listen_loop, (void*)NULL);
   int readkbret = pthread_create(&read_keyboard_thread, NULL, read_keyboard_loop, (void*)NULL);
@@ -49,11 +74,13 @@ int main( int argc, char *argv[] )
 
 void send_msg()
 {
-  char buffer[10];
+  int len = 10;
+  char buffer[len];
   buffer[0] = 0x81; //fin + opcode 1 (text frame)
-  buffer[1] = 0x01; //payload size = 1
-  buffer[2] = 0x32; //0x32 is 50 ascii = number 2
- 
+  buffer[1] = 0x02; //Mask 0 + payload size
+  strncpy(&buffer[2], "aa", 2); //0x32 is 50 ascii = number 2
+  buffer[4]='\0';
+  
   send(newsockfd, buffer, strlen(buffer), 0);
 }
 
