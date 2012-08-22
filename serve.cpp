@@ -39,9 +39,9 @@ game *gamelist[MAX_GAMES];
 socklen_t socketlist[MAX_SOCKETS];
 int g_numgames = 0;
 
-void creategame()
+void creategame(string gameid)
 {
-  game *new_game = new game(0);
+  game *new_game = new game(gameid);
   gamelist[g_numgames] = new_game;
   g_numgames++;
   cout<<"\n new game created";
@@ -121,9 +121,11 @@ void* recv_loop(void *ptr)
         cout<<"\n opcode: text frame";
       else if(opcode == 0x08)
         cout<<"\n opcode: connection close";
-      else
+      else {
         cout<<"\n opcode: not handled";
-     
+	continue;
+      }
+
       //byte 1 -> ismask, payload len
       recv(newsockfd, rb, 1, 0);
       int length = *rb & 0x7F;
@@ -140,7 +142,6 @@ void* recv_loop(void *ptr)
 	mask[i] = *rb;
       }
  
-
       cout<<"\n mask: "<<mask;
 
       //byte 14 - all -> payload 
@@ -156,8 +157,9 @@ void* recv_loop(void *ptr)
       }
       str[length]='\0';
       cout<<"\n datastr: "<<str;
+      creategame(str);
       
-      cout<<"\n **read done**\n\n";
+      cout<<"\n read complete\n\n";
     }
   }
    
@@ -220,7 +222,7 @@ void* listen_loop(void *ptr)
     n = read(newsockfd,buffer,sizeof(buffer));
     if (n < 0){
       cout<<"\nERROR reading from socket";
-      return(0);
+      continue;
     }
 
     if(strlen(buffer)==0) {
@@ -232,8 +234,14 @@ void* listen_loop(void *ptr)
     
     char keyhead[] ="Sec-WebSocket-Key: ";
     char *ptr1 = strstr(buffer,keyhead);
+    
     char verhead[] = "Sec-WebSocket-Version: ";
     char* ptr2 = strstr(buffer, verhead);
+
+    if(!ptr1 || !ptr2){
+      cout<<"\n this is some crappy shit";
+      continue;
+    }
 
     int key_len = strlen(ptr1)-strlen(ptr2)-strlen(keyhead)-1;
 
@@ -267,16 +275,7 @@ void* listen_loop(void *ptr)
       cout<<"\nERROR writing to socket";
       return(0);
     }
-
-    //cout<<"\n about to sleep";
-    //sleep(3);
-    //cout<<"\n awake - about to send";
-    //char hello[] = "hello";
-    //send(newsockfd, hello, strlen(hello), 0);
-    //cout<<"\n send completed";
-    //sleep(3);
   }
-
   return 0; 
 }
 
