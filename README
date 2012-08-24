@@ -1,3 +1,5 @@
 A capture the flag game
 - multiplayer
 - with teams 
+
+Javascript frontend with a C++ backend on a unix server
