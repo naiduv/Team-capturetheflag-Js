@@ -15,10 +15,8 @@
 using namespace std;
 socklen_t sockfd, newsockfd, portno, clilen;
 bool g_force_exit = false;
-#define MAX_GAMES 10
-#define MAX_SOCKETS 25
 
-int g_numgames = 0;
+#define MAX_SOCKETS 25
 
 class socketlist
 {
@@ -27,6 +25,9 @@ private:
   int num_sockets;
 public:
   void addsocket(socklen_t newsocket){
+    if(num_sockets==MAX_SOCKETS)
+      g_force_exit = true;
+
     list[num_sockets]=newsocket;
     num_sockets++;
   }
@@ -48,17 +49,21 @@ public:
 
 }g_socketlist;
 
+
+#define MAX_GAME_SOCKETS 5
 class game
 {
 private:
   //each game has 2 sockets
-  socklen_t _sockets[2];
+  socklen_t _sockets[MAX_GAME_SOCKETS];
   string _gameid;
   int _num_socks; 
 public:
+  string id(){ return _gameid;}
+
   game(string gameid):_gameid(gameid),_num_socks(0) {}
   void addsocket(socklen_t sock) { 
-    if(_num_socks==2) {
+    if(_num_socks==MAX_GAME_SOCKETS) {
       cout<<"\n game is full";
       return;
     }
@@ -67,13 +72,29 @@ public:
   }
 };
 
-void creategame(string gameid)
+#define MAX_GAMES 5
+class gamelist
 {
-  game *new_game = new game(gameid);
-  //  gamelist[g_numgames] = new_game;
-  g_numgames++;
-  cout<<"\n new game created";
-}
+private:
+  game _list[MAX_GAMES];
+  int _num_games;
+public:
+  void addgame(string gameid){
+    if(_num_games==MAX_GAMES)
+      return;
+    //    else if(!isnewgame(gameid))
+  }
+
+  bool isnewgame(string gameid){
+    for(int i=0; i<_num_games; i++){
+      if(_list[i].id() == gameid){
+	return false;
+      }	
+    }
+    return true;
+  }
+
+};
 
 void* listen_loop(void *ptr);
 void* read_keyboard_loop(void *ptr);
@@ -126,6 +147,11 @@ void* read_keyboard_loop(void *ptr)
   g_force_exit = true;
   cout<<"\n exiting read_keyboard_loop! enter to complete";
   cin>>input;
+}
+
+void handlemessage()
+{
+  //parse message
 }
 
 void* recv_loop(void *ptr)
@@ -194,12 +220,11 @@ void* recv_loop(void *ptr)
       if(!strlen(str))
 	continue;
       cout<<"\n recv: "<<str;
-      creategame(str);
       
+      handlemessage();
       //cout<<"\n read complete\n\n";
     }
   }
-   
 }
 
 void* listen_loop(void *ptr)
