@@ -82,7 +82,9 @@ public:
   void addgame(string gameid){
     if(_num_games==MAX_GAMES)
       return;
-    //    else if(!isnewgame(gameid))
+    else if(isnewgame(gameid)){
+      //gamelist[_num_games] = 
+      }
   }
 
   bool isnewgame(string gameid){
