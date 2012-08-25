@@ -155,10 +155,14 @@ void* recv_loop(void *ptr)
 	continue;
       }
 
+      if(!fin || !opcode)
+	continue;
+
       //byte 1 -> ismask, payload len
       recv(sock, rb, 1, 0);
       int length = *rb & 0x7F;
-      //cout<<"\n length: "<<length;
+      if(length<1 || length>120)
+	continue;
 
       //byte 2-9 -> check 2-7 for extended payload
       //recv(newsockfd, rb, 8, 0);
@@ -171,6 +175,9 @@ void* recv_loop(void *ptr)
 	mask[i] = *rb;
       }
  
+      if(!strlen(mask))
+	continue;
+
       cout<<"\n mask: "<<mask;
 
       //byte 14 - all -> payload 
@@ -185,6 +192,8 @@ void* recv_loop(void *ptr)
 	//sprintf(str,"%d",data);
       }
       str[length]='\0';
+      if(!strlen(str))
+	continue;
       cout<<"\n datastr: "<<str;
       creategame(str);
       
