@@ -167,7 +167,6 @@ void* recv_loop(void *ptr)
       //byte 2-9 -> check 2-7 for extended payload
       //recv(newsockfd, rb, 8, 0);
 
-      //cout<<"\n getting mask\n";
       //byte 10-13 -> masking
       char mask[4];
       for(int i=0; i<4;i++){
@@ -178,7 +177,7 @@ void* recv_loop(void *ptr)
       if(!strlen(mask))
 	continue;
 
-      cout<<"\n mask: "<<mask;
+      //cout<<"\n mask: "<<mask;
 
       //byte 14 - all -> payload 
       int data;
@@ -194,7 +193,7 @@ void* recv_loop(void *ptr)
       str[length]='\0';
       if(!strlen(str))
 	continue;
-      cout<<"\n datastr: "<<str;
+      cout<<"\n recv: "<<str;
       creategame(str);
       
       //cout<<"\n read complete\n\n";
