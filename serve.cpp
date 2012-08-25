@@ -63,13 +63,13 @@ int main( int argc, char *argv[] )
   int listenret = pthread_create(&listen_thread, NULL, listen_loop, (void*)NULL);
   int readkbret = pthread_create(&read_keyboard_thread, NULL, read_keyboard_loop, (void*)NULL);
   int closesockret = pthread_create(&close_socks_thread, NULL, close_socks_loop, (void*)NULL);
-  int recvret = pthread_create(&recv_thread, NULL, recv_loop, (void*)NULL);
+  //  int recvret = pthread_create(&recv_thread, NULL, recv_loop, (void*)NULL);
   cout<<"\n thread create completed";
 
   pthread_join(listen_thread, NULL);
   pthread_join(read_keyboard_thread, NULL);
   pthread_join(close_socks_thread, NULL);
-  pthread_join(recv_thread, NULL);
+  //  pthread_join(recv_thread, NULL);
 }
 
 void send_msg()
@@ -245,7 +245,7 @@ void* listen_loop(void *ptr)
 
     int key_len = strlen(ptr1)-strlen(ptr2)-strlen(keyhead)-1;
 
-    char key[1000];
+    char key[1000] = "test";
     strncpy(key, ptr1+strlen(keyhead), key_len);
     key[key_len-1] = '\0';
     cout<<"\nkey: "<<key;
@@ -256,7 +256,7 @@ void* listen_loop(void *ptr)
 
     cout<<"\ncatkey:"<<key;
 
-    unsigned char hash[20];
+    unsigned char hash[24];
     sha1::calc(key, strlen(key), hash);
     cout<<"\nhash : "<<hash;
  
