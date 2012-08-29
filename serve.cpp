@@ -72,12 +72,24 @@ public:
   }
 };
 
+struct ping
+{
+  int teamid;
+  int playerid;
+  int x;
+  int y;
+  int lx;
+  int ly;
+};
+
 #define MAX_GAMES 5
 class gamelist
 {
 private:
   game _list[MAX_GAMES];
   int _num_games;
+  ping _pinglist[100];
+
 public:
   void addgame(string gameid){
     if(_num_games==MAX_GAMES)
@@ -96,12 +108,18 @@ public:
     return true;
   }
 
+  bool addping(ping p)
+  {
+    
+  }
+
 };
 
 void* listen_loop(void *ptr);
 void* read_keyboard_loop(void *ptr);
 void* close_socks_loop(void *ptr);
 void* recv_loop(void *ptr);
+void* send_loop(void *ptr);
 
 int main( int argc, char *argv[] )
 {
@@ -110,17 +128,21 @@ int main( int argc, char *argv[] )
   pthread_t read_keyboard_thread;
   pthread_t close_socks_thread; 
   pthread_t recv_thread;
+  pthread_t send_thread;
 
   int listenret = pthread_create(&listen_thread, NULL, listen_loop, (void*)NULL);
   int readkbret = pthread_create(&read_keyboard_thread, NULL, read_keyboard_loop, (void*)NULL);
   int closesockret = pthread_create(&close_socks_thread, NULL, close_socks_loop, (void*)NULL);
   int recvret = pthread_create(&recv_thread, NULL, recv_loop, (void*)NULL);
+  int sendret = pthread_create(&send_thread, NULL, send_loop, (void*)NULL);
   cout<<"\n thread create completed";
 
   pthread_join(listen_thread, NULL);
   pthread_join(read_keyboard_thread, NULL);
   pthread_join(close_socks_thread, NULL);
   pthread_join(recv_thread, NULL);
+  pthread_join(send_thread, NULL);
+
 }
 
 void send_msg()
@@ -153,7 +175,10 @@ void* read_keyboard_loop(void *ptr)
 
 void handlemessage()
 {
-  //parse message
+  //parse message - gameid, teamid, playerid, xloc, yloc, xlook, ylook
+  
+  //send it to the correct game
+
 }
 
 void* recv_loop(void *ptr)
