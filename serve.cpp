@@ -59,7 +59,7 @@ private:
   string _gameid;
   int _num_socks; 
 public:
-  string id(){ return _gameid;}
+  string id(){ return _gameid; }
 
   game(string gameid):_gameid(gameid),_num_socks(0) {}
   void addsocket(socklen_t sock) { 
@@ -72,48 +72,66 @@ public:
   }
 };
 
-struct ping
+class msg
 {
+public:
   int teamid;
   int playerid;
   int x;
   int y;
   int lx;
   int ly;
+
+  void print() {
+    cout<<"\nprinting msg";
+    cout<<"\nteamid: "<<teamid;
+    cout<<"\nplayerid: "<<playerid;
+    cout<<"\nx: "<<x;
+    cout<<"\ny: "<<y;
+    cout<<"\nlx: "<<lx;
+    cout<<"\nly: "<<ly;
+    cout<<"\n\n";
+  }
 };
 
 #define MAX_GAMES 5
 class gamelist
 {
 private:
-  game _list[MAX_GAMES];
+  game *_list[MAX_GAMES];
   int _num_games;
-  ping _pinglist[100];
 
 public:
+  int size() { return _num_games; }
+
+  game* getgame(int pos) { 
+    assert(_num_games>pos);
+    return _list[pos]; 
+  }
+
   void addgame(string gameid){
     if(_num_games==MAX_GAMES)
       return;
     else if(isnewgame(gameid)){
-      //gamelist[_num_games] = 
+      _list[_num_games] = new game(gameid);
       }
   }
 
   bool isnewgame(string gameid){
     for(int i=0; i<_num_games; i++){
-      if(_list[i].id() == gameid){
+      if(_list[i]->id() == gameid){
 	return false;
       }	
     }
     return true;
   }
 
-  bool addping(ping p)
+  bool storemsg(msg m)
   {
     
   }
 
-};
+}g_gamelist;
 
 void* listen_loop(void *ptr);
 void* read_keyboard_loop(void *ptr);
@@ -157,6 +175,16 @@ void send_msg()
   send(newsockfd, buffer, strlen(buffer), 0);
 }
 
+void* send_loop(void *ptr)
+{
+  //go through all the games
+  while(!g_force_exit) {
+    for(int i=0; i<g_gamelist.size(); i++) {
+      //sendmsgg_gamelist.getgame(i);   
+    }
+  }
+}
+
 void* read_keyboard_loop(void *ptr)
 {
   cout<<"\n entering read keyb loop";
@@ -173,12 +201,38 @@ void* read_keyboard_loop(void *ptr)
   cin>>input;
 }
 
-void handlemessage()
+void handlemessage(string str)
 {
-  //parse message - gameid, teamid, playerid, xloc, yloc, xlook, ylook
-  
-  //send it to the correct game
+  cout<<"\nmsg: "<<str;
+  msg *m = new msg();
 
+  int pos = str.find_first_of(" ");
+  int count = 0;
+  string gameid;
+  while(pos>0){
+    cout<<"\npos: "<<pos;
+    cout<<"  var: "<<str.substr(0, pos);
+    int num = atoi(str.c_str());
+    switch(count){
+    case 0: gameid = str; break;
+    case 1: m->teamid = num; break;
+    case 2: m->playerid = num; break;
+    case 3: m->x = num; break;
+    case 4: m->y = num; break;
+    case 5: m->lx = num; break;
+    case 6: m->ly = num; break;
+    default: assert(0);
+    }
+    cout<<"\nhere";
+    count++;
+    str = str.substr(pos+1);
+    cout<<"\nstr: "<<str;
+    pos = str.find_first_of(" ");
+    cout<<"\npos: "<<pos;
+  }
+
+  m->print();
+  cout<<"\n\n";
 }
 
 void* recv_loop(void *ptr)
@@ -248,7 +302,7 @@ void* recv_loop(void *ptr)
 	continue;
       cout<<"\n recv: "<<str;
       
-      handlemessage();
+      handlemessage(str);
       //cout<<"\n read complete\n\n";
     }
   }
