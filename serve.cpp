@@ -11,6 +11,9 @@
 #include <pthread.h>
 #include <unistd.h>
 #include <assert.h>
+//for hex to int and stringstream
+#include <iomanip>
+#include <sstream>
 
 using namespace std;
 socklen_t sockfd, newsockfd, portno, clilen;
@@ -74,19 +77,18 @@ public:
   }
 };
 
-void sock_send(socklen_t sock, string buffer)
+void socksend(socklen_t sock, string buffer)
 {
-
-  char cb[3];
-  cb[0] = 0x81; //fin+opcode
-  cb[1] = 0x01; //Mask 0 + payload size (120 always)
-  cb[2]  = 'a';
-
   string sb;
-  sb.append(cb, strlen(cb));
+  std::stringstream hexbuf;
+  hexbuf<<hex<<129; //129 = 1000|0001 fin1+opcode1
+  hexbuf<<hex<<buffer.length();
+  cout<<"\n hexbuf: "<<hexbuf;
   sb.append(buffer);
-  cout<<"\n attempting socksend to :"<<sock<<"\n"; 
-  send(sock,cb , 3, 0);
+  cout<<"\n attempting socksend to :"<<sock; 
+  //send(sock,cb , 3, 0);
+  cout<<"\n socksendstr: "<<sb<<" length:"<<sb.length()<<"\n"; 
+  send(sock, sb.c_str(), sb.length(),0);
 }
 
 #define MAX_GAME_SOCKETS 5
@@ -132,7 +134,7 @@ public:
     for(int i=0; i<_num_socks; i++){
       if(_sockets[i]!=sendersock){
 	//write to the sockets
-	sock_send(_sockets[i], m->msgstr);
+	socksend(_sockets[i], m->msgstr);
       }	
     }
   }
