@@ -94,8 +94,27 @@ public:
     _num_socks++; 
   }
 
-  void sendmsg(msg* m){
-    //change this to notify peers
+  bool isnewsocket(socklen_t sock)
+  {
+    for(int i=0; i<_num_socks; i++){
+      if(_sockets[i]==sock)
+	return true;
+    }
+    return false;
+  }
+
+  //this is crude, we should not send to the sender!!
+  void sendmsg(msg* m, socklen_t sendersock){
+    //new socket, add it to sock list
+    if(isnewsocket(sendersock))
+      addsocket(sendersock);
+    
+    //send msg to the other socks
+    for(int i=0; i<_num_socks; i++){
+      if(_sockets[i]!=sendersock){
+	//write to the sockets
+      }	
+    }
   }
 };
 
@@ -150,7 +169,6 @@ void* listen_loop(void *ptr);
 void* read_keyboard_loop(void *ptr);
 void* close_socks_loop(void *ptr);
 void* recv_loop(void *ptr);
-//void* send_loop(void *ptr);
 
 int main( int argc, char *argv[] )
 {
@@ -159,46 +177,32 @@ int main( int argc, char *argv[] )
   pthread_t read_keyboard_thread;
   pthread_t close_socks_thread; 
   pthread_t recv_thread;
-  //pthread_t send_thread;
 
   int listenret = pthread_create(&listen_thread, NULL, listen_loop, (void*)NULL);
   int readkbret = pthread_create(&read_keyboard_thread, NULL, read_keyboard_loop, (void*)NULL);
   int closesockret = pthread_create(&close_socks_thread, NULL, close_socks_loop, (void*)NULL);
   int recvret = pthread_create(&recv_thread, NULL, recv_loop, (void*)NULL);
-  //int sendret = pthread_create(&send_thread, NULL, send_loop, (void*)NULL);
+  
   cout<<"\n thread create completed";
 
   pthread_join(listen_thread, NULL);
   pthread_join(read_keyboard_thread, NULL);
   pthread_join(close_socks_thread, NULL);
   pthread_join(recv_thread, NULL);
-  //pthread_join(send_thread, NULL);
 
 }
 
-void send_msg()//socklen_t sock, string buffer)
+void send_msg()
 {
   int len = 10;
-  char cbuffer[len];
-  /*
-  cbuffer[0] = 0x81; //fin + opcode 1 (text frame)
-  cbuffer[1] = 0x02; //Mask 0 + payload size
+  char buffer[len];
+  buffer[0] = 0x81; //fin + opcode 1 (text frame)
+  buffer[1] = 0x02; //Mask 0 + payload size
   strncpy(&buffer[2], "aa", 2); //0x32 is 50 ascii = number 2
   buffer[4]='\0';
   
-  send(newsockfd, buffer.c_str(), buffer.length(), 0);
-  */
+  send(newsockfd, buffer, strlen(buffer), 0);
 }
-
-//void* send_loop(void *ptr)
-//{
-//  //go through all the games
-//  while(!g_force_exit) {
-//    for(int i=0; i<g_gamelist.size(); i++) {
-//      //sendmsgg_gamelist.getgame(i);   
-//    }
-//  }
-//}
 
 void* read_keyboard_loop(void *ptr)
 {
@@ -216,7 +220,7 @@ void* read_keyboard_loop(void *ptr)
   cin>>input;
 }
 
-void handlemessage(string str)
+void handlemessage(string str, socklen_t sock)
 {
   //cout<<"\nmsg: "<<str;
   msg *m = new msg();
@@ -253,11 +257,12 @@ void handlemessage(string str)
   if(!fgame)
     fgame = g_gamelist.addgame(gameid);
 
-  
   assert(fgame);
   //activate send msg to all the other game sox
-  fgame->sendmsg(m);
+  fgame->sendmsg(m, sock);
   cout<<"\n sending msg to peers";
+
+  
 
   //m->print();
   //cout<<"\n\n";
@@ -330,7 +335,7 @@ void* recv_loop(void *ptr)
 	continue;
       cout<<"\n recv: "<<str;
       
-      handlemessage(str);
+      handlemessage(str, sock);
       //cout<<"\n read complete\n\n";
     }
   }
