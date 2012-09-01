@@ -54,6 +54,7 @@ public:
 class msg
 {
 public:
+  string msgstr;
   int teamid;
   int playerid;
   int x;
@@ -72,6 +73,21 @@ public:
     cout<<"\n\n";
   }
 };
+
+void sock_send(socklen_t sock, string buffer)
+{
+
+  char cb[3];
+  cb[0] = 0x81; //fin+opcode
+  cb[1] = 0x01; //Mask 0 + payload size (120 always)
+  cb[2]  = 'a';
+
+  string sb;
+  sb.append(cb, strlen(cb));
+  sb.append(buffer);
+  cout<<"\n attempting socksend to :"<<sock<<"\n"; 
+  send(sock,cb , 3, 0);
+}
 
 #define MAX_GAME_SOCKETS 5
 class game
@@ -98,25 +114,31 @@ public:
   {
     for(int i=0; i<_num_socks; i++){
       if(_sockets[i]==sock)
-	return true;
+	return false;
     }
-    return false;
+    return true;
   }
 
   //this is crude, we should not send to the sender!!
   void sendmsg(msg* m, socklen_t sendersock){
     //new socket, add it to sock list
-    if(isnewsocket(sendersock))
+    if(isnewsocket(sendersock)){
       addsocket(sendersock);
+      cout<<"\nadded team: "<<m->teamid<<" to game: "<<_gameid;
+    }
     
     //send msg to the other socks
+    cout<<"\nsendersock: "<<sendersock;
     for(int i=0; i<_num_socks; i++){
       if(_sockets[i]!=sendersock){
 	//write to the sockets
+	sock_send(_sockets[i], m->msgstr);
       }	
     }
   }
 };
+
+
 
 
 #define MAX_GAMES 5
@@ -146,7 +168,7 @@ public:
     return newgame;
   }
 
-  bool isnewgame(string gameid){
+  bool isnwgame(string gameid){
     for(int i=0; i<_num_games; i++){
       if(_list[i]->id() == gameid){
 	return false;
@@ -194,6 +216,7 @@ int main( int argc, char *argv[] )
 
 void send_msg()
 {
+  cout<<"\n force send payload \n\n";
   int len = 10;
   char buffer[len];
   buffer[0] = 0x81; //fin + opcode 1 (text frame)
@@ -201,8 +224,9 @@ void send_msg()
   strncpy(&buffer[2], "aa", 2); //0x32 is 50 ascii = number 2
   buffer[4]='\0';
   
-  send(newsockfd, buffer, strlen(buffer), 0);
+  send(g_socketlist.getsock(0), buffer, strlen(buffer), 0);
 }
+
 
 void* read_keyboard_loop(void *ptr)
 {
@@ -224,16 +248,17 @@ void handlemessage(string str, socklen_t sock)
 {
   //cout<<"\nmsg: "<<str;
   msg *m = new msg();
-
+  m->msgstr = str;
   int pos = str.find_first_of(" ");
   int count = 0;
   string gameid;
   while(pos>0){
     //cout<<"\npos: "<<pos;
     //cout<<"  var: "<<str.substr(0, pos);
+    str = str.substr(pos+1);
     int num = atoi(str.c_str());
     switch(count){
-    case 0: gameid = str; break;
+    case 0: gameid = num; break;
     case 1: m->teamid = num; break;
     case 2: m->playerid = num; break;
     case 3: m->x = num; break;
@@ -244,7 +269,6 @@ void handlemessage(string str, socklen_t sock)
     }
     //cout<<"\nhere";
     count++;
-    str = str.substr(pos+1);
     //cout<<"\nstr: "<<str;
     pos = str.find_first_of(" ");
     //cout<<"\npos: "<<pos;
@@ -264,7 +288,7 @@ void handlemessage(string str, socklen_t sock)
 
   
 
-  //m->print();
+  m->print();
   //cout<<"\n\n";
 }
 
