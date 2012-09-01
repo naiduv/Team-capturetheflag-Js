@@ -50,27 +50,6 @@ public:
 }g_socketlist;
 
 
-#define MAX_GAME_SOCKETS 5
-class game
-{
-private:
-  //each game has 2 sockets
-  socklen_t _sockets[MAX_GAME_SOCKETS];
-  string _gameid;
-  int _num_socks; 
-public:
-  string id(){ return _gameid; }
-
-  game(string gameid):_gameid(gameid),_num_socks(0) {}
-  void addsocket(socklen_t sock) { 
-    if(_num_socks==MAX_GAME_SOCKETS) {
-      cout<<"\n game is full";
-      return;
-    }
-    _sockets[_num_socks]= sock; 
-    _num_socks++; 
-  }
-};
 
 class msg
 {
@@ -94,6 +73,33 @@ public:
   }
 };
 
+#define MAX_GAME_SOCKETS 5
+class game
+{
+private:
+  //each game has 2 sockets
+  socklen_t _sockets[MAX_GAME_SOCKETS];
+  string _gameid;
+  int _num_socks; 
+public:
+  string id(){ return _gameid; }
+
+  game(string gameid):_gameid(gameid),_num_socks(0) {}
+  void addsocket(socklen_t sock) { 
+    if(_num_socks==MAX_GAME_SOCKETS) {
+      cout<<"\n game is full";
+      return;
+    }
+    _sockets[_num_socks]= sock; 
+    _num_socks++; 
+  }
+
+  void sendmsg(msg* m){
+    //change this to notify peers
+  }
+};
+
+
 #define MAX_GAMES 5
 class gamelist
 {
@@ -109,12 +115,16 @@ public:
     return _list[pos]; 
   }
 
-  void addgame(string gameid){
+  game* addgame(string gameid){
     if(_num_games==MAX_GAMES)
-      return;
-    else if(isnewgame(gameid)){
-      _list[_num_games] = new game(gameid);
-      }
+      return NULL;
+    
+    cout<<"\ncreateing new game with id: "<<gameid;
+    cout<<"\n\n";
+    game* newgame = new game(gameid);
+    _list[_num_games] = newgame;
+    _num_games++;
+    return newgame;
   }
 
   bool isnewgame(string gameid){
@@ -126,9 +136,12 @@ public:
     return true;
   }
 
-  bool storemsg(msg m)
-  {
-    
+  game* findgame(string gameid){
+    for(int i=0; i<_num_games; i++){
+      if(_list[i]->id()==gameid)
+	return _list[i];
+    }
+    return NULL;
   }
 
 }g_gamelist;
@@ -137,7 +150,7 @@ void* listen_loop(void *ptr);
 void* read_keyboard_loop(void *ptr);
 void* close_socks_loop(void *ptr);
 void* recv_loop(void *ptr);
-void* send_loop(void *ptr);
+//void* send_loop(void *ptr);
 
 int main( int argc, char *argv[] )
 {
@@ -146,44 +159,46 @@ int main( int argc, char *argv[] )
   pthread_t read_keyboard_thread;
   pthread_t close_socks_thread; 
   pthread_t recv_thread;
-  pthread_t send_thread;
+  //pthread_t send_thread;
 
   int listenret = pthread_create(&listen_thread, NULL, listen_loop, (void*)NULL);
   int readkbret = pthread_create(&read_keyboard_thread, NULL, read_keyboard_loop, (void*)NULL);
   int closesockret = pthread_create(&close_socks_thread, NULL, close_socks_loop, (void*)NULL);
   int recvret = pthread_create(&recv_thread, NULL, recv_loop, (void*)NULL);
-  int sendret = pthread_create(&send_thread, NULL, send_loop, (void*)NULL);
+  //int sendret = pthread_create(&send_thread, NULL, send_loop, (void*)NULL);
   cout<<"\n thread create completed";
 
   pthread_join(listen_thread, NULL);
   pthread_join(read_keyboard_thread, NULL);
   pthread_join(close_socks_thread, NULL);
   pthread_join(recv_thread, NULL);
-  pthread_join(send_thread, NULL);
+  //pthread_join(send_thread, NULL);
 
 }
 
-void send_msg()
+void send_msg()//socklen_t sock, string buffer)
 {
   int len = 10;
-  char buffer[len];
-  buffer[0] = 0x81; //fin + opcode 1 (text frame)
-  buffer[1] = 0x02; //Mask 0 + payload size
+  char cbuffer[len];
+  /*
+  cbuffer[0] = 0x81; //fin + opcode 1 (text frame)
+  cbuffer[1] = 0x02; //Mask 0 + payload size
   strncpy(&buffer[2], "aa", 2); //0x32 is 50 ascii = number 2
   buffer[4]='\0';
   
-  send(newsockfd, buffer, strlen(buffer), 0);
+  send(newsockfd, buffer.c_str(), buffer.length(), 0);
+  */
 }
 
-void* send_loop(void *ptr)
-{
-  //go through all the games
-  while(!g_force_exit) {
-    for(int i=0; i<g_gamelist.size(); i++) {
-      //sendmsgg_gamelist.getgame(i);   
-    }
-  }
-}
+//void* send_loop(void *ptr)
+//{
+//  //go through all the games
+//  while(!g_force_exit) {
+//    for(int i=0; i<g_gamelist.size(); i++) {
+//      //sendmsgg_gamelist.getgame(i);   
+//    }
+//  }
+//}
 
 void* read_keyboard_loop(void *ptr)
 {
@@ -203,15 +218,15 @@ void* read_keyboard_loop(void *ptr)
 
 void handlemessage(string str)
 {
-  cout<<"\nmsg: "<<str;
+  //cout<<"\nmsg: "<<str;
   msg *m = new msg();
 
   int pos = str.find_first_of(" ");
   int count = 0;
   string gameid;
   while(pos>0){
-    cout<<"\npos: "<<pos;
-    cout<<"  var: "<<str.substr(0, pos);
+    //cout<<"\npos: "<<pos;
+    //cout<<"  var: "<<str.substr(0, pos);
     int num = atoi(str.c_str());
     switch(count){
     case 0: gameid = str; break;
@@ -223,16 +238,29 @@ void handlemessage(string str)
     case 6: m->ly = num; break;
     default: assert(0);
     }
-    cout<<"\nhere";
+    //cout<<"\nhere";
     count++;
     str = str.substr(pos+1);
-    cout<<"\nstr: "<<str;
+    //cout<<"\nstr: "<<str;
     pos = str.find_first_of(" ");
-    cout<<"\npos: "<<pos;
+    //cout<<"\npos: "<<pos;
   }
 
-  m->print();
-  cout<<"\n\n";
+  //find the game in the list, corr to this msg
+  game* fgame = g_gamelist.findgame(gameid);
+
+  //if it does not exist, make a new one
+  if(!fgame)
+    fgame = g_gamelist.addgame(gameid);
+
+  
+  assert(fgame);
+  //activate send msg to all the other game sox
+  fgame->sendmsg(m);
+  cout<<"\n sending msg to peers";
+
+  //m->print();
+  //cout<<"\n\n";
 }
 
 void* recv_loop(void *ptr)
