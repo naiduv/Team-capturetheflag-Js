@@ -28,11 +28,13 @@ window.onkeydown = function(e){
 		case 87:
 			if(!started) return;
 			//fbgameref.push({func:"mu", teamid:teamid, id:ls.id, locx:ls.loc.x, locy:ls.loc.y, lookx:ls.lookpt.x, looky:ls.lookpt.y});
+			if(Socket) Socket.send("gameid:"+gameid+" teamid:"+teamid+ " id:"+ls.id +" locx:"+ls.loc.x +" locy:"+ls.loc.y+ " lookx:"+ls.lookpt.x +" looky:"+ls.lookpt.y+" ");
 			ls.moveup();
 			break;
 		case 83:
 			if(!started) return;
 			//fbgameref.push({func:"md", teamid:teamid, id:ls.id, locx:ls.loc.x, locy:ls.loc.y, lookx:ls.lookpt.x, looky:ls.lookpt.y});		
+			if(Socket) Socket.send("gameid:"+gameid+" teamid:"+teamid+ " id:"+ls.id +" locx:"+ls.loc.x +" locy:"+ls.loc.y+ " lookx:"+ls.lookpt.x +" looky:"+ls.lookpt.y+" ");
 			ls.movedown();
 			break;
 		case 13:
@@ -44,19 +46,50 @@ window.onkeydown = function(e){
 				//gameidform.hidden = true;
 				gameidform.innerText = "YOUR GAMEID IS " + gameid + ". INVITE FRIENDS TO JOIN!";
 
-				Socket = new WebSocket("ws://www.mailerdemon.com:5001");
+				Socket = new WebSocket("ws://192.168.0.189:5001");
+				//Socket = new WebSocket("ws://www.mailerdemon.com:5001");
+				//Socket = new WebSocket("ws://10.0.2.15:5001");
+
 				Socket.onopen = function() {
 					console.log('conn established');
 				}
 				Socket.onmessage = function (e) {
   					console.log('Server: ' + e.data);
+  					var message = e.data;
+				    // console.log('child_added');
+				    if(message.teamid==teamid)
+				    	return;
+
+				    var new_opp_soldier = true;
+				    for(var i in opp_soldiers) {
+				   		if (opp_soldiers[i].id==message.id) {
+				   			opp_soldiers[i].loc = makepoint(message.locx, message.locy);
+				   			opp_soldiers[i].lookat(makepoint(message.lookx, message.looky));
+				   			//opp_soldiers[i].draw();
+				   			if(message.func=="mu")
+				   				opp_soldiers[i].moveup();
+				   			else if(message.func=="md")
+				   				opp_soldiers[i].movedown();
+				   			else if(message.func=="nm")
+				   				opp_soldiers[i].draw();
+
+
+				   			new_opp_soldier = false;
+				   			console.log('opp_soldier found, loc updated');
+				   		} 	
+				    }
+
+				    if(new_opp_soldier) {
+				    	opp_soldiers.push(makesoldier(ctx1, message.teamid, message.id, message.locx, message.locy, message.lookx, message.looky));	   
+						// console.log('new opp_soldier added');
+					}
 				};
 				Socket.onclose = function () {
   					console.log('conn was closed');
 				};
 				Socket.onerror = function() {
 					console.log('conn error');
-				}
+				};
 
 
 				//fbgameref = fb.child(gameid);
