@@ -15,7 +15,8 @@ var timer;
 var ammo = 0;
 var teamid = Math.floor(Math.random()*10000);
 var idcount = 0;
-var increment = 4;
+//increment used to set the step size for each player move
+var increment = 3;
 var Socket;
 
 window.onkeydown = function(e){
@@ -28,17 +29,16 @@ window.onkeydown = function(e){
 		case 87:
 			if(!started) return;
 			//fbgameref.push({func:"mu", teamid:teamid, id:ls.id, locx:ls.loc.x, locy:ls.loc.y, lookx:ls.lookpt.x, looky:ls.lookpt.y});
-			ls.loc.x= Math.round(ls.loc.x);
-			ls.loc.y= Math.round(ls.loc.y);
-			ls.lookx= Math.round(ls.lookx);
-			ls.looky= Math.round(ls.looky);
-			if(Socket) Socket.send('{"func":'+"'mu'"+', "gameid":'+gameid+', "teamid":'+teamid+ ', "id":'+ls.id +', "locx":'+ls.loc.x +', "locy":'+ls.loc.y+ ', "lookx":'+ls.lookpt.x +', "looky":'+ls.lookpt.y+' }');
+			ls.loc.x= round(ls.loc.x);
+			ls.loc.y= round(ls.loc.y);
+			ls.lookx= round(ls.lookx);
+			ls.looky= round(ls.looky);
+			if(Socket) Socket.send('{"fc":'+"'mu'"+',"gid":'+gameid+',"tid":'+teamid+ ',"pid":'+ls.id +',"px":'+ls.loc.x +',"py":'+ls.loc.y+ ',"lx":'+ls.lookpt.x +',"ly":'+ls.lookpt.y+'}');
 			ls.moveup();
 			break;
 		case 83:
 			if(!started) return;
-			//fbgameref.push({func:"md", teamid:teamid, id:ls.id, locx:ls.loc.x, locy:ls.loc.y, lookx:ls.lookpt.x, looky:ls.lookpt.y});		
-			if(Socket) Socket.send('{"func":'+"'md'"+', "gameid":'+gameid+', "teamid":'+teamid+ ', "id":'+ls.id +', "locx":'+ls.loc.x +', "locy":'+ls.loc.y+ ', "lookx":'+ls.lookpt.x +', "looky":'+ls.lookpt.y+' }');
+			if(Socket) Socket.send('{"fc":'+"'md'"+',"gid":'+gameid+',"tid":'+teamid+ ',"pid":'+ls.id +',"px":'+ls.loc.x +',"py":'+ls.loc.y+ ',"lx":'+ls.lookpt.x +',"ly":'+ls.lookpt.y+'}');
 			ls.movedown();
 			break;
 		case 13:
@@ -62,20 +62,20 @@ window.onkeydown = function(e){
   					eval("smx1="+e.data);
   					var message = smx1;
 				    // console.log('child_added');
-				    if(message.teamid==teamid)
+				    if(message.tid==teamid)
 				    	return;
 
 				    var new_opp_soldier = true;
 				    for(var i in opp_soldiers) {
-				   		if (opp_soldiers[i].id==message.id) {
-				   			opp_soldiers[i].loc = makepoint(message.locx, message.locy);
-				   			opp_soldiers[i].lookat(makepoint(message.lookx, message.looky));
+				   		if (opp_soldiers[i].id==message.pid) {
+				   			opp_soldiers[i].loc = makepoint(message.px, message.py);
+				   			opp_soldiers[i].lookat(makepoint(message.lx, message.ly));
 				   			//opp_soldiers[i].draw();
-				   			if(message.func=="mu")
+				   			if(message.fc=="mu")
 				   				opp_soldiers[i].moveup();
-				   			else if(message.func=="md")
+				   			else if(message.fc=="md")
 				   				opp_soldiers[i].movedown();
-				   			else if(message.func=="nm")
+				   			else if(message.fc=="nm")
 				   				opp_soldiers[i].draw();
 
 
@@ -85,7 +85,7 @@ window.onkeydown = function(e){
 				    }
 
 				    if(new_opp_soldier) {
-				    	opp_soldiers.push(makesoldier(ctx1, message.teamid, message.id, message.locx, message.locy, message.lookx, message.looky));	   
+				    	opp_soldiers.push(makesoldier(ctx1, message.tid, message.pid, message.px, message.py, message.lx, message.ly));	   
 						// console.log('new opp_soldier added');
 					}
 				};

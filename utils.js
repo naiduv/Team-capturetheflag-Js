@@ -11,3 +11,14 @@ function myrand(max)
 {
 	return randomsign()*(Math.random()*max);
 }
+
+//unsigned rand
+function myurand(max)
+{
+	return (Math.random()*max);
+}
+
+function round(num)
+{
+	return (Math.round(num*100)/100);
+}
