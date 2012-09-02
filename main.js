@@ -28,13 +28,17 @@ window.onkeydown = function(e){
 		case 87:
 			if(!started) return;
 			//fbgameref.push({func:"mu", teamid:teamid, id:ls.id, locx:ls.loc.x, locy:ls.loc.y, lookx:ls.lookpt.x, looky:ls.lookpt.y});
-			if(Socket) Socket.send("gameid:"+gameid+" teamid:"+teamid+ " id:"+ls.id +" locx:"+ls.loc.x +" locy:"+ls.loc.y+ " lookx:"+ls.lookpt.x +" looky:"+ls.lookpt.y+" ");
+			ls.loc.x= Math.round(ls.loc.x);
+			ls.loc.y= Math.round(ls.loc.y);
+			ls.lookx= Math.round(ls.lookx);
+			ls.looky= Math.round(ls.looky);
+			if(Socket) Socket.send('{"func":'+"'mu'"+', "gameid":'+gameid+', "teamid":'+teamid+ ', "id":'+ls.id +', "locx":'+ls.loc.x +', "locy":'+ls.loc.y+ ', "lookx":'+ls.lookpt.x +', "looky":'+ls.lookpt.y+' }');
 			ls.moveup();
 			break;
 		case 83:
 			if(!started) return;
 			//fbgameref.push({func:"md", teamid:teamid, id:ls.id, locx:ls.loc.x, locy:ls.loc.y, lookx:ls.lookpt.x, looky:ls.lookpt.y});		
-			if(Socket) Socket.send("gameid:"+gameid+" teamid:"+teamid+ " id:"+ls.id +" locx:"+ls.loc.x +" locy:"+ls.loc.y+ " lookx:"+ls.lookpt.x +" looky:"+ls.lookpt.y+" ");
+			if(Socket) Socket.send('{"func":'+"'md'"+', "gameid":'+gameid+', "teamid":'+teamid+ ', "id":'+ls.id +', "locx":'+ls.loc.x +', "locy":'+ls.loc.y+ ', "lookx":'+ls.lookpt.x +', "looky":'+ls.lookpt.y+' }');
 			ls.movedown();
 			break;
 		case 13:
@@ -55,7 +59,8 @@ window.onkeydown = function(e){
 				}
 				Socket.onmessage = function (e) {
   					console.log('Server: ' + e.data);
-  					var message = e.data;
+  					eval("smx1="+e.data);
+  					var message = smx1;
 				    // console.log('child_added');
 				    if(message.teamid==teamid)
 				    	return;
