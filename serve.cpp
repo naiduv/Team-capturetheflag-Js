@@ -303,7 +303,7 @@ void handlemessage(string str, socklen_t sock)
 
   
 
-  m->print();
+  //m->print();
   //cout<<"\n\n";
 }
 
