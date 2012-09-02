@@ -280,6 +280,7 @@ void handlemessage(string str, socklen_t sock)
     case 4: m->y = num; break;
     case 5: m->lx = num; break;
     case 6: m->ly = num; break;
+    case 7: break;
     default: assert(0);
     }
     //cout<<"\nhere";
