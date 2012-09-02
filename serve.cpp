@@ -79,16 +79,32 @@ public:
 
 void socksend(socklen_t sock, string buffer)
 {
-  string sb;
-  std::stringstream hexbuf;
-  hexbuf<<hex<<129; //129 = 1000|0001 fin1+opcode1
-  hexbuf<<hex<<buffer.length();
+  char cb[120];
+  sprintf(cb, "%c", 129);
+  if(buffer.length()>1 && buffer.length()<118) 
+    sprintf(cb+1, "%c", (int)buffer.length());
+  else {
+    cout<<"\n buffer too small/big: "<<buffer;
+    assert(0);
+  }
+  cb[2]='\0';
+  //cb[0]='a';
+  //cb[1]='b';
+  //cb[2]='\0';
+  strncat(cb,buffer.c_str(),buffer.length());
+  //  cb[2]='\0';
+  //cout<<"\n cb: "<<cb;
+  //std::stringstream hexbuf;
+  /*
+  hexbuf<<"0x"<<hex<<129<<"0x"<<hex<<buffer.length()<<buffer;
   cout<<"\n hexbuf: "<<hexbuf;
-  sb.append(buffer);
-  cout<<"\n attempting socksend to :"<<sock; 
+  string sb (hexbuf.str());
+  cout<<"\n attempting socksend to :"<<sock;
+  */
+ 
   //send(sock,cb , 3, 0);
-  cout<<"\n socksendstr: "<<sb<<" length:"<<sb.length()<<"\n"; 
-  send(sock, sb.c_str(), sb.length(),0);
+  cout<<"\n socksendstr: "<<cb<<" length:"<<strlen(cb)<<"\n"; 
+  send(sock, cb, strlen(cb),0);
 }
 
 #define MAX_GAME_SOCKETS 5
@@ -139,9 +155,6 @@ public:
     }
   }
 };
-
-
-
 
 #define MAX_GAMES 5
 class gamelist
