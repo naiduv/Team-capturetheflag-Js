@@ -81,30 +81,16 @@ void socksend(socklen_t sock, string buffer)
 {
   char cb[120];
   sprintf(cb, "%c", 129);
-  if(buffer.length()>1 && buffer.length()<118) 
+  if(buffer.length()>36 && buffer.length()<118) {
     sprintf(cb+1, "%c", (int)buffer.length());
-  else {
+    cb[2]='\0';
+    strncat(cb,buffer.c_str(),buffer.length());
+    cout<<"\n socksendstr: "<<cb<<" length:"<<strlen(cb)<<"\n"; 
+    send(sock, cb, strlen(cb),0);
+  } else {
     cout<<"\n buffer too small/big: "<<buffer;
-    assert(0);
+    //assert(0);
   }
-  cb[2]='\0';
-  //cb[0]='a';
-  //cb[1]='b';
-  //cb[2]='\0';
-  strncat(cb,buffer.c_str(),buffer.length());
-  //  cb[2]='\0';
-  //cout<<"\n cb: "<<cb;
-  //std::stringstream hexbuf;
-  /*
-  hexbuf<<"0x"<<hex<<129<<"0x"<<hex<<buffer.length()<<buffer;
-  cout<<"\n hexbuf: "<<hexbuf;
-  string sb (hexbuf.str());
-  cout<<"\n attempting socksend to :"<<sock;
-  */
- 
-  //send(sock,cb , 3, 0);
-  cout<<"\n socksendstr: "<<cb<<" length:"<<strlen(cb)<<"\n"; 
-  send(sock, cb, strlen(cb),0);
 }
 
 #define MAX_GAME_SOCKETS 5
@@ -138,11 +124,11 @@ public:
   }
 
   //this is crude, we should not send to the sender!!
-  void sendmsg(msg* m, socklen_t sendersock){
+  void sendmsg(string m, socklen_t sendersock){
     //new socket, add it to sock list
     if(isnewsocket(sendersock)){
       addsocket(sendersock);
-      cout<<"\nadded team: "<<m->teamid<<" to game: "<<_gameid;
+      //cout<<"\nadded team: "<<m->teamid<<" to game: "<<_gameid;
     }
     
     //send msg to the other socks
@@ -150,7 +136,7 @@ public:
     for(int i=0; i<_num_socks; i++){
       if(_sockets[i]!=sendersock){
 	//write to the sockets
-	socksend(_sockets[i], m->msgstr);
+	socksend(_sockets[i], m);
       }	
     }
   }
@@ -227,6 +213,7 @@ int main( int argc, char *argv[] )
   pthread_join(close_socks_thread, NULL);
   pthread_join(recv_thread, NULL);
 
+  cout<<"\n exiting main";
 }
 
 void send_msg()
@@ -299,7 +286,7 @@ void handlemessage(string str, socklen_t sock)
 
   assert(fgame);
   //activate send msg to all the other game sox
-  fgame->sendmsg(m, sock);
+  fgame->sendmsg(str, sock);
   cout<<"\n sending msg to peers";
 
   
@@ -375,10 +362,13 @@ void* recv_loop(void *ptr)
 	continue;
       cout<<"\n recv: "<<str;
       
-      handlemessage(str, sock);
+      //check the string for a gameid, if not, we got some junk
+      if(strstr(str, "fc") && strstr(str, "gid"))
+	handlemessage(str, sock);
       //cout<<"\n read complete\n\n";
     }
   }
+  cout<<"\n exiting recv  loop";
 }
 
 void* listen_loop(void *ptr)
@@ -500,6 +490,8 @@ void* listen_loop(void *ptr)
     g_socketlist.addsocket(newsockfd);
 
   }
+
+  cout<<"\n exiting recv loop\n\n";
   return 0; 
 }
 
@@ -517,5 +509,5 @@ void* close_socks_loop(void *ptr)
     }
   }
   cout<<"\n closed sockets. leaving close_socks_loop";
-  exit(0);
+   
 }

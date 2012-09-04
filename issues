@@ -2,3 +2,4 @@
 * gameid should be stored correctly
 * limits on game size characters in main.js
 * fix msg parsing in handlemessage
+* fix errors
