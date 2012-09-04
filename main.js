@@ -33,12 +33,12 @@ window.onkeydown = function(e){
 			ls.loc.y= round(ls.loc.y);
 			ls.lookx= round(ls.lookx);
 			ls.looky= round(ls.looky);
-			if(Socket) Socket.send('{"fc":'+"'mu'"+',"gid":'+gameid+',"tid":'+teamid+ ',"pid":'+ls.id +',"px":'+ls.loc.x +',"py":'+ls.loc.y+ ',"lx":'+ls.lookpt.x +',"ly":'+ls.lookpt.y+'}');
+			//if(Socket) Socket.send('{"fc":'+"'mu'"+',"gid":'+gameid+',"tid":'+teamid+ ',"pid":'+ls.id +',"px":'+ls.loc.x +',"py":'+ls.loc.y+ ',"lx":'+ls.lookpt.x +',"ly":'+ls.lookpt.y+'}');
 			ls.moveup();
 			break;
 		case 83:
 			if(!started) return;
-			if(Socket) Socket.send('{"fc":'+"'md'"+',"gid":'+gameid+',"tid":'+teamid+ ',"pid":'+ls.id +',"px":'+ls.loc.x +',"py":'+ls.loc.y+ ',"lx":'+ls.lookpt.x +',"ly":'+ls.lookpt.y+'}');
+			//if(Socket) Socket.send('{"fc":'+"'md'"+',"gid":'+gameid+',"tid":'+teamid+ ',"pid":'+ls.id +',"px":'+ls.loc.x +',"py":'+ls.loc.y+ ',"lx":'+ls.lookpt.x +',"ly":'+ls.lookpt.y+'}');
 			ls.movedown();
 			break;
 		case 13:
@@ -67,9 +67,12 @@ window.onkeydown = function(e){
 
 				    var new_opp_soldier = true;
 				    for(var i in opp_soldiers) {
-				   		if (opp_soldiers[i].id==message.pid) {
+				   		if (opp_soldiers[i].id==message.pid) { 
+				   			if(distance(opp_soldiers[i].loc, makepoint(message.px, message.py)))
+				   				ctx1.clearRect(opp_soldiers[i].loc.x-20, opp_soldiers[i].loc.y-20, opp_soldiers[i].w+20,opp_soldiers[i].h+20);
 				   			opp_soldiers[i].loc = makepoint(message.px, message.py);
 				   			opp_soldiers[i].lookat(makepoint(message.lx, message.ly));
+				   			//dealing with points that are too far apart
 				   			//opp_soldiers[i].draw();
 				   			if(message.fc=="mu")
 				   				opp_soldiers[i].moveup();
@@ -228,6 +231,17 @@ function commandloop() {
 		if(soldiers[i].waypoint.length) {
 			soldiers[i].lookat(soldiers[i].waypoint[0]);
 			soldiers[i].moveup();
+			soldiers[i].loc.x= round(soldiers[i].loc.x);
+			soldiers[i].loc.y= round(soldiers[i].loc.y);
+			soldiers[i].lookx= round(soldiers[i].lookx);
+			soldiers[i].looky= round(soldiers[i].looky);
+			if(Socket) {
+				var message= '{"fc":'+"'mu'"+',"gid":'+gameid+',"tid":'+teamid+ ',"pid":'+soldiers[i].id +',"px":'+soldiers[i].loc.x +',"py":'+soldiers[i].loc.y+ ',"lx":'+soldiers[i].lookpt.x +',"ly":'+soldiers[i].lookpt.y+'}';
+				if(message.length>35 && message.length<115){
+					console.log(message);
+					Socket.send(message);
+				}
+			}
 			//fbgameref.push({func:"mu", teamid:teamid, id:soldiers[i].id, locx:soldiers[i].loc.x, locy:soldiers[i].loc.y, lookx:soldiers[i].lookpt.x, looky:soldiers[i].lookpt.y});
 			//when we get to a waypoint
 			if(ptinrect(soldiers[i].waypoint[0], soldiers[i].rect)) {				// console.log('hit waypoint');
@@ -330,7 +344,7 @@ function mainloop(){
 		if(!stop_running)
 			commandloop();
 			//randomloop();
-	}, 70);
+	}, 100);
 }
 
 //THIS IS THE MAIN FUNCTION

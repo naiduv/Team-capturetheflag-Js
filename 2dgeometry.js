@@ -6,6 +6,12 @@ Point = function(x,y){
 Point.prototype = {
 };
 
+distance = function(p1,p2){
+	xd = p1.x - p2.x;
+	yd = p1.y - p2.y;
+	return Math.sqrt(xd*xd + yd*yd);
+}
+
 Rect = function(x,y,w,h){
 	this.x = x;
 	this.y = y;
