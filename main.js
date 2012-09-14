@@ -33,13 +33,21 @@ window.onkeydown = function(e){
 			ls.loc.y= round(ls.loc.y);
 			ls.lookx= round(ls.lookx);
 			ls.looky= round(ls.looky);
+			if(Socket) {
+				var message= '{"fc":'+"'mu'"+',"gid":'+gameid+',"tid":'+teamid+ ',"pid":'+ls.id +',"px":'+ls.loc.x +',"py":'+ls.loc.y+ ',"lx":'+ls.lookpt.x +',"ly":'+ls.lookpt.y+'}';
+				if(message.length>35 && message.length<115){
+					//console.log(message);
+					Socket.send(message);
+				}
+			}
 			//if(Socket) Socket.send('{"fc":'+"'mu'"+',"gid":'+gameid+',"tid":'+teamid+ ',"pid":'+ls.id +',"px":'+ls.loc.x +',"py":'+ls.loc.y+ ',"lx":'+ls.lookpt.x +',"ly":'+ls.lookpt.y+'}');
 			ls.moveup();
 			break;
 		case 83:
-			if(!started) return;
+			return;
+			//if(!started) return;
 			//if(Socket) Socket.send('{"fc":'+"'md'"+',"gid":'+gameid+',"tid":'+teamid+ ',"pid":'+ls.id +',"px":'+ls.loc.x +',"py":'+ls.loc.y+ ',"lx":'+ls.lookpt.x +',"ly":'+ls.lookpt.y+'}');
-			ls.movedown();
+			//ls.movedown();
 			break;
 		case 13:
 			if(!gameid) {
@@ -50,7 +58,7 @@ window.onkeydown = function(e){
 				//gameidform.hidden = true;
 				gameidform.innerText = "YOUR GAMEID IS " + gameid + ". INVITE FRIENDS TO JOIN!";
 
-				Socket = new WebSocket("ws://192.168.0.189:5001");
+				Socket = new WebSocket("ws://192.168.0.191:5001");
 				//Socket = new WebSocket("ws://www.mailerdemon.com:5001");
 				//Socket = new WebSocket("ws://10.0.2.15:5001");
 
@@ -238,7 +246,7 @@ function commandloop() {
 			if(Socket) {
 				var message= '{"fc":'+"'mu'"+',"gid":'+gameid+',"tid":'+teamid+ ',"pid":'+soldiers[i].id +',"px":'+soldiers[i].loc.x +',"py":'+soldiers[i].loc.y+ ',"lx":'+soldiers[i].lookpt.x +',"ly":'+soldiers[i].lookpt.y+'}';
 				if(message.length>35 && message.length<115){
-					console.log(message);
+					//console.log(message);
 					Socket.send(message);
 				}
 			}
@@ -344,7 +352,7 @@ function mainloop(){
 		if(!stop_running)
 			commandloop();
 			//randomloop();
-	}, 100);
+	}, 70);
 }
 
 //THIS IS THE MAIN FUNCTION
