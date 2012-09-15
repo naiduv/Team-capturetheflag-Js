@@ -17,7 +17,7 @@ var ammo = 0;
 var teamid = Math.floor(Math.random()*10000);
 var idcount = 0;
 //increment used to set the step size for each player move
-var increment = 10;
+var increment = 3;
 var Socket;
 
 var flags = [];

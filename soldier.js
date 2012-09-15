@@ -62,7 +62,7 @@ tank.prototype = {
 		this.loc.x += increment*Math.sin(this.lookangle*Math.PI/180);
 		this.loc.y -= increment*Math.cos(this.lookangle*Math.PI/180);
     	this.rect = makerect(this.loc.x-this.w/2-increment*2,this.loc.y-this.h/2-increment*2,this.w+(4*increment),this.h+(4*increment));  	
-		this.collrect = makerect(this.loc.x-this.w/2,this.loc.y-this.h/2,this.w,this.h);
+		this.collrect = makerect(this.loc.x-this.w/2-increment,this.loc.y-this.h/2-increment,this.w+increment*2,this.h+increment*2);
 
 		// if(Socket) {
 		// 	var message= '{"fc":'+"'mu'"+',"gid":'+gameid+',"tid":'+this.teamid+ ',"pid":'+this.id +',"px":'+round(this.loc.x) +',"py":'+round(this.loc.y)+ ',"lx":'+round(this.lookpt.x) +',"ly":'+round(this.lookpt.y)+'}';
