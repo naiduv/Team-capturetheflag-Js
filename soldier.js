@@ -21,6 +21,7 @@ soldier = function(x, y){
 	this.alive = true;
 	this.bleeding = false;
 	this.waypoint = [];
+	this.sendcount = 0;
 	_this = this;
 }
 
@@ -59,17 +60,27 @@ soldier.prototype = {
 	moveup : function(force){
 		this.loc.x += increment*Math.sin(this.lookangle*Math.PI/180);
 		this.loc.y -= increment*Math.cos(this.lookangle*Math.PI/180);
-    	this.rect = makerect(this.loc.x-this.w/2-increment*2,this.loc.y-this.h/2-increment*2,this.w+(4*increment),this.h+(4*increment));
-    	
+    	this.rect = makerect(this.loc.x-this.w/2-increment*2,this.loc.y-this.h/2-increment*2,this.w+(4*increment),this.h+(4*increment));    	
+		if(Socket) {
+			var message= '{"fc":'+"'mu'"+',"gid":'+gameid+',"tid":'+this.teamid+ ',"pid":'+this.id +',"px":'+round(this.loc.x) +',"py":'+round(this.loc.y)+ ',"lx":'+round(this.lookpt.x) +',"ly":'+round(this.lookpt.y)+'}';
+			this.sendcount++;
+			if(message.length>35 && message.length<115){
+				if(this.sendcount==10){
+					Socket.send(message);
+					this.sendcount=0;
+				}
+			}
+		}
+
     	//forcing it down if it collides with another rect
-		if(!force) {
-    		for (var i in soldiers) {
-    			if(this.id!=soldiers[i].id && soldiers[i].alive && rectscollide(this.rect, soldiers[i].rect)) {
-					this.movedown(true);
-    				return;
-    			}
-    		}
-    	}
+		// if(!force) {
+  //   		for (var i in soldiers) {
+  //   			if(this.id!=soldiers[i].id && soldiers[i].alive && rectscollide(this.rect, soldiers[i].rect)) {
+		// 			this.movedown(true);
+  //   				return;
+  //   			}
+  //   		}
+  //   	}
    		this.draw(true);
 	},
 
@@ -104,6 +115,29 @@ soldier.prototype = {
 	hidefire: function(){
 		this.firing=false;
 		this.draw();
+	},
+
+	automove: function(){
+		if(this.waypoint.length) { 
+		    //look at the wayoint and make a move up to it
+		    this.lookat(this.waypoint[0]);
+		    this.moveup();
+		    //when we get to a waypoint
+		    if(ptinrect(this.waypoint[0], this.rect)) {
+				//remove the waypoint
+				this.waypoint.shift();
+				//point the soldier in the new waypoint dir, if it exists
+				if(this.waypoint.length) {
+			    	//look at next waypoint
+			   		this.lookat(this.waypoint[0]);
+				}
+			}
+		} else {
+		    //if no commands just look around so that we are not cleaned out
+		    this.lookat(makepoint(this.lookpt.x+myrand(1), this.lookpt.y+myrand(1)));
+		    this.draw();
+		}
+
 	},
 
 	hit: function(damage){

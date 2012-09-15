@@ -29,17 +29,6 @@ window.onkeydown = function(e){
 		case 87:
 			if(!started) return;
 			//fbgameref.push({func:"mu", teamid:teamid, id:ls.id, locx:ls.loc.x, locy:ls.loc.y, lookx:ls.lookpt.x, looky:ls.lookpt.y});
-			ls.loc.x= round(ls.loc.x);
-			ls.loc.y= round(ls.loc.y);
-			ls.lookx= round(ls.lookx);
-			ls.looky= round(ls.looky);
-			if(Socket) {
-				var message= '{"fc":'+"'mu'"+',"gid":'+gameid+',"tid":'+teamid+ ',"pid":'+ls.id +',"px":'+ls.loc.x +',"py":'+ls.loc.y+ ',"lx":'+ls.lookpt.x +',"ly":'+ls.lookpt.y+'}';
-				if(message.length>35 && message.length<115){
-					//console.log(message);
-					Socket.send(message);
-				}
-			}
 			//if(Socket) Socket.send('{"fc":'+"'mu'"+',"gid":'+gameid+',"tid":'+teamid+ ',"pid":'+ls.id +',"px":'+ls.loc.x +',"py":'+ls.loc.y+ ',"lx":'+ls.lookpt.x +',"ly":'+ls.lookpt.y+'}');
 			ls.moveup();
 			break;
@@ -78,18 +67,18 @@ window.onkeydown = function(e){
 				   		if (opp_soldiers[i].id==message.pid) { 
 				   			if(distance(opp_soldiers[i].loc, makepoint(message.px, message.py)))
 				   				ctx1.clearRect(opp_soldiers[i].loc.x-20, opp_soldiers[i].loc.y-20, opp_soldiers[i].w+20,opp_soldiers[i].h+20);
-				   			opp_soldiers[i].loc = makepoint(message.px, message.py);
-				   			opp_soldiers[i].lookat(makepoint(message.lx, message.ly));
+				   			// opp_soldiers[i].loc = makepoint(message.px, message.py);
+				   			// opp_soldiers[i].lookat(makepoint(message.lx, message.ly));
 				   			//dealing with points that are too far apart
-				   			//opp_soldiers[i].draw();
-				   			if(message.fc=="mu")
-				   				opp_soldiers[i].moveup();
-				   			else if(message.fc=="md")
-				   				opp_soldiers[i].movedown();
-				   			else if(message.fc=="nm")
-				   				opp_soldiers[i].draw();
-
-
+				   			// //opp_soldiers[i].draw();
+				   			// if(message.fc=="mu")
+				   			// 	opp_soldiers[i].moveup();
+				   			// else if(message.fc=="md")
+				   			// 	opp_soldiers[i].movedown();
+				   			// else if(message.fc=="nm")
+				   			// 	opp_soldiers[i].draw();
+				   			opp_soldiers[i].waypoint = [];
+				   			opp_soldiers[i].waypoint.push(makepoint(message.px, message.py));
 				   			new_opp_soldier = false;
 				   			console.log('opp_soldier found, loc updated');
 				   		} 	
@@ -232,28 +221,14 @@ function canvasdblclick(e){
 
 function commandloop() {
     for (var i in soldiers) {
-	if(ls==soldiers[i] || !soldiers[i].alive)
-	    continue;
-	if(soldiers[i].waypoint.length) { 
-	    //look at the wayoint and make a move up to it
-	    soldiers[i].lookat(soldiers[i].waypoint[0]);
-	    soldiers[i].moveup();
-	    //when we get to a waypoint
-	    if(ptinrect(soldiers[i].waypoint[0], soldiers[i].rect)) {
-		//remove the waypoint
-		soldiers[i].waypoint.shift();
-		//point the soldier in the new waypoint dir, if it exists
-		if(soldiers[i].waypoint.length) {
-		    //look at next waypoint
-		    soldiers[i].lookat(soldiers[i].waypoint[0]);
-		}
-	    }
-	} else {
-	    //if no commands just look around so that we are not cleaned out
-	    soldiers[i].lookat(makepoint(soldiers[i].lookpt.x+myrand(1), soldiers[i].lookpt.y+myrand(1)));
-	    soldiers[i].draw();
-	}
+    	if(ls!=soldiers[i])
+    		soldiers[i].automove();
+    } 
+
+    for (var i in opp_soldiers) {
+    	opp_soldiers[i].automove();
     }
+
 }
 
 //fb is changed after the gameid is entered!!!!! check onkeypress 13 (enter)
