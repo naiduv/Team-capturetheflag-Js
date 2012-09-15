@@ -5,6 +5,7 @@
 <script language="JavaScript" src="2dgeometry.js"></script>
 <script language="JavaScript" src="soldier.js"></script>
 <script language="JavaScript" src="utils.js"></script>
+<script language="JavaScript" src="flag.js"></script>
 <style type="text/css">
 
 canvas{
@@ -14,12 +15,15 @@ canvas{
 	left:5%;
 	height:90%;
 	width:90%;
-/*	background:url(./images/dashboard/wasd.png);
-	background-repeat: no-repeat;
+/*	background-repeat: no-repeat;
 	background-attachment:fixed;
 	background-position:left top;
 	background-color:;*/
 }
+
+/*#top-canvas{
+	background:url(./images/maps/map.png);
+}*/
 
 /*#background
 {
@@ -72,8 +76,9 @@ body
 					</div>
 
 <!-- REMEMBER Z ORDER MATTER HERE, ALSO THE TOP ONE GETS THE MOUSE COMMANDS!!! -->
-<center><canvas id="bottom-canvas" style="z-index: 1"></canvas></center>
-<center><canvas id="top-canvas" style="z-index: 2"></canvas></center>
+<center><canvas id="canvas-z" style="z-index: 0"></canvas></center>
+<center><canvas id="canvas-i" style="z-index: 1"></canvas></center>
+<center><canvas id="canvas-o" style="z-index: 2"></canvas></center>
 
 <form id="gameidform" class="formfont" onSubmit="return false;">
 CHOOSE A UNIQUE GAME ID    <input type="text" class="inputform" id="gameid"></input><br />
@@ -84,5 +89,6 @@ CHOOSE A UNIQUE GAME ID    <input type="text" class="inputform" id="gameid"></in
 <img id="tank_walking_3" src=".\images\soldier\walking\3.gif" style="visibility:hidden;height:0%;width:0%"></img>
 <img id="gunfire" src=".\images\soldier\walking\gunfire.gif" style="visibility:hidden;height:0%;width:0%"></img>
 <img id="bleeding" src=".\images\soldier\walking\bleeding.gif" style="visibility:hidden;height:0%;width:0%"></img>
+
 </body>
 </html>

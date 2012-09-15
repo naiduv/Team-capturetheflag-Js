@@ -2,7 +2,7 @@ var bkcolor = "#FFFFFF"
 var ls;
 var gameid;
 var tanks = [];
-var num_tanks = 4;
+var num_tanks = 3;
 var canvas_w;
 var canvas_h;
 var stop_running = false;
@@ -10,14 +10,19 @@ var stop_running = false;
 // var fbgameref;
 var ctx0;
 var ctx1;
+var ctx2;
 var tank_count = 0;
 var timer;
 var ammo = 0;
 var teamid = Math.floor(Math.random()*10000);
 var idcount = 0;
 //increment used to set the step size for each player move
-var increment = 2;
+var increment = 10;
 var Socket;
+
+var flags = [];
+var flagx;
+var flagy;
 
 window.onkeydown = function(e){
 	if(ls==0)
@@ -66,8 +71,8 @@ window.onkeydown = function(e){
 				    var new_opp_tank = true;
 				    for(var i in opp_tanks) {
 				   		if (opp_tanks[i].id==message.pid) { 
-				   			if(distance(opp_tanks[i].loc, makepoint(message.px, message.py)))
-				   				ctx1.clearRect(opp_tanks[i].loc.x-20, opp_tanks[i].loc.y-20, opp_tanks[i].w+20,opp_tanks[i].h+20);
+				   			// if(distance(opp_tanks[i].loc, makepoint(message.px, message.py)))
+				   			// 	ctx1.clearRect(opp_tanks[i].loc.x-20, opp_tanks[i].loc.y-20, opp_tanks[i].w+20,opp_tanks[i].h+20);
 				   			// opp_tanks[i].loc = makepoint(message.px, message.py);
 				   			// opp_tanks[i].lookat(makepoint(message.lx, message.ly));
 				   			//dealing with points that are too far apart
@@ -172,19 +177,6 @@ function handleclick(pt){
 	}
 }
 
-window.onresize = function()
-{
-  var c = document.getElementById("top-canvas");
-  ctx0 = c.getContext("2d");
-  ctx0.canvas.width  = window.innerWidth;
-  ctx0.canvas.height = window.innerHeight;
-
-  c = document.getElementById("bottom-canvas");
-  ctx1 = c.getContext("2d");
-  ctx1.canvas.width  = window.innerWidth;
-  ctx1.canvas.height = window.innerHeight;
-}
-
 function canvasmousemove(e){
 	if(!started) return;
 
@@ -230,6 +222,17 @@ function commandloop() {
     	opp_tanks[i].automove();
     }
 
+}
+
+function flagloop() {
+	flags[0].checkoccupied(tanks);
+}
+
+function initflag() {
+	flagx = myurand(800);
+	flagy = myurand(600);
+	flags.push(new flag(ctx1, makepoint(flagx, flagy)));
+	flags[0].draw();
 }
 
 //fb is changed after the gameid is entered!!!!! check onkeypress 13 (enter)
@@ -278,7 +281,7 @@ function randomloop()
 }
 
 function initcanvas(){
-	var c = document.getElementById("top-canvas");
+	var c = document.getElementById("canvas-o");
  	ctx0 = c.getContext("2d");
   	canvas_w = ctx0.canvas.width  = window.innerWidth;
   	canvas_h = ctx0.canvas.height = window.innerHeight;
@@ -286,15 +289,45 @@ function initcanvas(){
 	c.addEventListener('mouseup', canvasmouseup);
 	c.addEventListener('dblclick', canvasdblclick);
 
-	c = document.getElementById("bottom-canvas");
+	c = document.getElementById("canvas-i");
 	ctx1 = c.getContext("2d");
+
+	c = document.getElementById("canvas-z");
+	ctx2 = c.getContext("2d");
+
+	resizecanvas();
+}
+
+
+window.onresize = function()
+{
+	resizecanvas();
+}
+
+function resizecanvas(){
+	var c = document.getElementById("canvas-o");
+	ctx0 = c.getContext("2d");
+	ctx0.canvas.width  = window.innerWidth;
+	ctx0.canvas.height = window.innerHeight;
+
+	c = document.getElementById("canvas-i");
+	ctx1 = c.getContext("2d");
+	ctx1.canvas.width  = window.innerWidth;
+	ctx1.canvas.height = window.innerHeight;
+
+	c = document.getElementById("canvas-z");
+	ctx2 = c.getContext("2d");
+	ctx2.canvas.width  = window.innerWidth;
+	ctx2.canvas.height = window.innerHeight;
 }
 
 //initialize the units
 function initsquad() {
+	var x = myurand(window.innerWidth);
+	var y = myurand(window.innerHeight) 
 	while(tank_count<num_tanks) {
 		//ls = new tank(100+Math.floor(Math.random()*(canvas_w-200)),100+Math.floor(Math.random()*(canvas_h-200)));
-		ls = new tank((tank_count*50)+50, (tank_count)+canvas_h-50);
+		ls = new tank(ctx0, (tank_count*50)+x, (tank_count)+y);
 		ls.draw();
 		tanks.push(ls);
 		tank_count++;
@@ -305,6 +338,7 @@ function mainloop(){
 	self.setInterval(function(){
 		if(!stop_running)
 			commandloop();
+			flagloop();
 			//randomloop();
 	}, 70);
 }
@@ -319,6 +353,7 @@ function start(){
 
 	//init the canvas, squad and start ai
 	initcanvas();
+	initflag();
 	initsquad();
 	mainloop();
 }

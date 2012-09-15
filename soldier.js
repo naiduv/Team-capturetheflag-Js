@@ -1,20 +1,21 @@
 
-tank = function(x, y){
+tank = function(ctx, x, y){
 	this.selected = false;
 	this.id = Math.floor(Math.random()*10000);
 	this.teamid = teamid;
 	this.lookpt = makepoint(myrand(100),myrand(100));
 	this.lookangle = 0;
-	this.w = 25;
-	this.h = 29;
+	this.w = 29;
+	this.h = 35;
 	//this.element = elem;
 	this.loc = new Point(x,y);
+	this.collrect = new Rect(this.loc.x-this.w/2-increment*2,this.loc.y-this.h/2-increment*2,this.w+(4*increment),this.h+(4*increment));
 	this.rect = new Rect(this.loc.x-this.w/2-increment*2,this.loc.y-this.h/2-increment*2,this.w+(4*increment),this.h+(4*increment));
 	this.ywalkloc = 1;
 	this.ywalkcycle = [	"tank_walking_1", 
 						"tank_walking_2",
 						"tank_walking_3"];
-	this.ctx = ctx0;
+	this.ctx = ctx;
 	this.firing = false;
 	this.ammo = 100;
 	this.health = 100;
@@ -29,7 +30,7 @@ tank.prototype = {
 	draw : function(movetank){
 		if(!this.ctx)
 			alert('error tank.draw()');
-		
+
 		this.ctx.save(); // save current state
 		this.rect.clear(this.ctx);
 
@@ -60,27 +61,29 @@ tank.prototype = {
 	moveup : function(force){
 		this.loc.x += increment*Math.sin(this.lookangle*Math.PI/180);
 		this.loc.y -= increment*Math.cos(this.lookangle*Math.PI/180);
-    	this.rect = makerect(this.loc.x-this.w/2-increment*2,this.loc.y-this.h/2-increment*2,this.w+(4*increment),this.h+(4*increment));    	
-		if(Socket) {
-			var message= '{"fc":'+"'mu'"+',"gid":'+gameid+',"tid":'+this.teamid+ ',"pid":'+this.id +',"px":'+round(this.loc.x) +',"py":'+round(this.loc.y)+ ',"lx":'+round(this.lookpt.x) +',"ly":'+round(this.lookpt.y)+'}';
-			this.sendcount++;
-			if(message.length>35 && message.length<115){
-				if(this.sendcount==10){
-					Socket.send(message);
-					this.sendcount=0;
-				}
-			}
-		}
+    	this.rect = makerect(this.loc.x-this.w/2-increment*2,this.loc.y-this.h/2-increment*2,this.w+(4*increment),this.h+(4*increment));  	
+		this.collrect = makerect(this.loc.x-this.w/2,this.loc.y-this.h/2,this.w,this.h);
+
+		// if(Socket) {
+		// 	var message= '{"fc":'+"'mu'"+',"gid":'+gameid+',"tid":'+this.teamid+ ',"pid":'+this.id +',"px":'+round(this.loc.x) +',"py":'+round(this.loc.y)+ ',"lx":'+round(this.lookpt.x) +',"ly":'+round(this.lookpt.y)+'}';
+		// 	this.sendcount++;
+		// 	if(message.length>35 && message.length<115){
+		// 		if(this.sendcount==10){
+		// 			Socket.send(message);
+		// 			this.sendcount=0;
+		// 		}
+		// 	}
+		// }
 
     	//forcing it down if it collides with another rect
-		// if(!force) {
-  //   		for (var i in tanks) {
-  //   			if(this.id!=tanks[i].id && tanks[i].alive && rectscollide(this.rect, tanks[i].rect)) {
-		// 			this.movedown(true);
-  //   				return;
-  //   			}
-  //   		}
-  //   	}
+		if(!force) {
+    		for (var i in tanks) {
+    			if(this.id!=tanks[i].id && tanks[i].alive && rectscollide(this.collrect, tanks[i].collrect)) {
+					this.movedown(true);
+    				return;
+    			}
+    		}
+    	}
    		this.draw(true);
 	},
 
@@ -88,11 +91,12 @@ tank.prototype = {
 		this.loc.x -= increment*Math.sin(this.lookangle*Math.PI/180);
 		this.loc.y += increment*Math.cos(this.lookangle*Math.PI/180);	
 		this.rect = makerect(this.loc.x-this.w/2-increment*2,this.loc.y-this.h/2-increment*2,this.w+(4*increment),this.h+(4*increment));
+		this.collrect = makerect(this.loc.x-this.w/2,this.loc.y-this.h/2,this.w,this.h);
 
 		//forcing it up if it collides with another rect
 		if(!force) {
     		for (var i in tanks) {
-    			if(this.id!=tanks[i].id && rectscollide(this.rect, tanks[i].rect)) {
+    			if(this.id!=tanks[i].id && rectscollide(this.collrect, tanks[i].collrect)) {
     				this.moveup(true);
     				return;
     			}
@@ -182,7 +186,6 @@ tank.prototype = {
 
 }
 
-
 function maketank(ctx, teamid, id,x,y,lookx,looky) {
 	s = new tank(x,y);
 	s.teamid = teamid;
@@ -191,4 +194,3 @@ function maketank(ctx, teamid, id,x,y,lookx,looky) {
 	s.ctx = ctx;
 	return s;
 }
-
