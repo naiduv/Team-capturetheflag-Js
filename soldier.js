@@ -1,5 +1,5 @@
 
-soldier = function(x, y){
+tank = function(x, y){
 	this.selected = false;
 	this.id = Math.floor(Math.random()*10000);
 	this.teamid = teamid;
@@ -11,9 +11,9 @@ soldier = function(x, y){
 	this.loc = new Point(x,y);
 	this.rect = new Rect(this.loc.x-this.w/2-increment*2,this.loc.y-this.h/2-increment*2,this.w+(4*increment),this.h+(4*increment));
 	this.ywalkloc = 1;
-	this.ywalkcycle = [	"soldier_walking_1", 
-						"soldier_walking_2",
-						"soldier_walking_3"];
+	this.ywalkcycle = [	"tank_walking_1", 
+						"tank_walking_2",
+						"tank_walking_3"];
 	this.ctx = ctx0;
 	this.firing = false;
 	this.ammo = 100;
@@ -25,10 +25,10 @@ soldier = function(x, y){
 	_this = this;
 }
 
-soldier.prototype = {
-	draw : function(movesoldier){
+tank.prototype = {
+	draw : function(movetank){
 		if(!this.ctx)
-			alert('error soldier.draw()');
+			alert('error tank.draw()');
 		
 		this.ctx.save(); // save current state
 		this.rect.clear(this.ctx);
@@ -36,7 +36,7 @@ soldier.prototype = {
 		this.ctx.translate(this.loc.x, this.loc.y);
  		this.ctx.rotate(this.lookangle*Math.PI/180); // rotate
 
-		this.ctx.drawImage(document.getElementById(this.walkingimage(movesoldier)),
+		this.ctx.drawImage(document.getElementById(this.walkingimage(movetank)),
 			-this.w/2,-this.h/2,this.w,this.h); //save the returns of document.getelementbyid in variables! should be faster
 		
 		if(this.firing)
@@ -48,8 +48,8 @@ soldier.prototype = {
 		this.ctx.restore();
 	},
 
-	walkingimage: function(movesoldier){
-		if(movesoldier) {		
+	walkingimage: function(movetank){
+		if(movetank) {		
 			this.ywalkloc++;
 			if(this.ywalkloc==3)
 				this.ywalkloc=0;
@@ -74,8 +74,8 @@ soldier.prototype = {
 
     	//forcing it down if it collides with another rect
 		// if(!force) {
-  //   		for (var i in soldiers) {
-  //   			if(this.id!=soldiers[i].id && soldiers[i].alive && rectscollide(this.rect, soldiers[i].rect)) {
+  //   		for (var i in tanks) {
+  //   			if(this.id!=tanks[i].id && tanks[i].alive && rectscollide(this.rect, tanks[i].rect)) {
 		// 			this.movedown(true);
   //   				return;
   //   			}
@@ -91,8 +91,8 @@ soldier.prototype = {
 
 		//forcing it up if it collides with another rect
 		if(!force) {
-    		for (var i in soldiers) {
-    			if(this.id!=soldiers[i].id && rectscollide(this.rect, soldiers[i].rect)) {
+    		for (var i in tanks) {
+    			if(this.id!=tanks[i].id && rectscollide(this.rect, tanks[i].rect)) {
     				this.moveup(true);
     				return;
     			}
@@ -126,7 +126,7 @@ soldier.prototype = {
 		    if(ptinrect(this.waypoint[0], this.rect)) {
 				//remove the waypoint
 				this.waypoint.shift();
-				//point the soldier in the new waypoint dir, if it exists
+				//point the tank in the new waypoint dir, if it exists
 				if(this.waypoint.length) {
 			    	//look at next waypoint
 			   		this.lookat(this.waypoint[0]);
@@ -134,7 +134,7 @@ soldier.prototype = {
 			}
 		} else {
 		    //if no commands just look around so that we are not cleaned out
-		    this.lookat(makepoint(this.lookpt.x+myrand(1), this.lookpt.y+myrand(1)));
+		    this.lookat(makepoint(this.lookpt.x+myrand(1)*0.5, this.lookpt.y+myrand(1)*0.5));
 		    this.draw();
 		}
 
@@ -183,8 +183,8 @@ soldier.prototype = {
 }
 
 
-function makesoldier(ctx, teamid, id,x,y,lookx,looky) {
-	s = new soldier(x,y);
+function maketank(ctx, teamid, id,x,y,lookx,looky) {
+	s = new tank(x,y);
 	s.teamid = teamid;
 	s.id = id;
 	s.lookpt = makepoint(lookx, looky);

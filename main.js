@@ -1,8 +1,8 @@
 var bkcolor = "#FFFFFF"
 var ls;
 var gameid;
-var soldiers = [];
-var num_soldiers = 3;
+var tanks = [];
+var num_tanks = 4;
 var canvas_w;
 var canvas_h;
 var stop_running = false;
@@ -10,13 +10,13 @@ var stop_running = false;
 // var fbgameref;
 var ctx0;
 var ctx1;
-var soldier_count = 0;
+var tank_count = 0;
 var timer;
 var ammo = 0;
 var teamid = Math.floor(Math.random()*10000);
 var idcount = 0;
 //increment used to set the step size for each player move
-var increment = 3;
+var increment = 2;
 var Socket;
 
 window.onkeydown = function(e){
@@ -27,6 +27,7 @@ window.onkeydown = function(e){
 	
 	switch(e.keyCode) {
 		case 87:
+			return;
 			if(!started) return;
 			//fbgameref.push({func:"mu", teamid:teamid, id:ls.id, locx:ls.loc.x, locy:ls.loc.y, lookx:ls.lookpt.x, looky:ls.lookpt.y});
 			//if(Socket) Socket.send('{"fc":'+"'mu'"+',"gid":'+gameid+',"tid":'+teamid+ ',"pid":'+ls.id +',"px":'+ls.loc.x +',"py":'+ls.loc.y+ ',"lx":'+ls.lookpt.x +',"ly":'+ls.lookpt.y+'}');
@@ -62,31 +63,31 @@ window.onkeydown = function(e){
 				    if(message.tid==teamid)
 				    	return;
 
-				    var new_opp_soldier = true;
-				    for(var i in opp_soldiers) {
-				   		if (opp_soldiers[i].id==message.pid) { 
-				   			if(distance(opp_soldiers[i].loc, makepoint(message.px, message.py)))
-				   				ctx1.clearRect(opp_soldiers[i].loc.x-20, opp_soldiers[i].loc.y-20, opp_soldiers[i].w+20,opp_soldiers[i].h+20);
-				   			// opp_soldiers[i].loc = makepoint(message.px, message.py);
-				   			// opp_soldiers[i].lookat(makepoint(message.lx, message.ly));
+				    var new_opp_tank = true;
+				    for(var i in opp_tanks) {
+				   		if (opp_tanks[i].id==message.pid) { 
+				   			if(distance(opp_tanks[i].loc, makepoint(message.px, message.py)))
+				   				ctx1.clearRect(opp_tanks[i].loc.x-20, opp_tanks[i].loc.y-20, opp_tanks[i].w+20,opp_tanks[i].h+20);
+				   			// opp_tanks[i].loc = makepoint(message.px, message.py);
+				   			// opp_tanks[i].lookat(makepoint(message.lx, message.ly));
 				   			//dealing with points that are too far apart
-				   			// //opp_soldiers[i].draw();
+				   			// //opp_tanks[i].draw();
 				   			// if(message.fc=="mu")
-				   			// 	opp_soldiers[i].moveup();
+				   			// 	opp_tanks[i].moveup();
 				   			// else if(message.fc=="md")
-				   			// 	opp_soldiers[i].movedown();
+				   			// 	opp_tanks[i].movedown();
 				   			// else if(message.fc=="nm")
-				   			// 	opp_soldiers[i].draw();
-				   			opp_soldiers[i].waypoint = [];
-				   			opp_soldiers[i].waypoint.push(makepoint(message.px, message.py));
-				   			new_opp_soldier = false;
-				   			console.log('opp_soldier found, loc updated');
+				   			// 	opp_tanks[i].draw();
+				   			opp_tanks[i].waypoint = [];
+				   			opp_tanks[i].waypoint.push(makepoint(message.px, message.py));
+				   			new_opp_tank = false;
+				   			console.log('opp_tank found, loc updated');
 				   		} 	
 				    }
 
-				    if(new_opp_soldier) {
-				    	opp_soldiers.push(makesoldier(ctx1, message.tid, message.pid, message.px, message.py, message.lx, message.ly));	   
-						// console.log('new opp_soldier added');
+				    if(new_opp_tank) {
+				    	opp_tanks.push(maketank(ctx1, message.tid, message.pid, message.px, message.py, message.lx, message.ly));	   
+						// console.log('new opp_tank added');
 					}
 				};
 				Socket.onclose = function () {
@@ -105,28 +106,28 @@ window.onkeydown = function(e){
 				//     if(message.teamid==teamid)
 				//     	return;
 
-				//     var new_opp_soldier = true;
-				//     for(var i in opp_soldiers) {
-				//    		if (opp_soldiers[i].id==message.id) {
-				//    			opp_soldiers[i].loc = makepoint(message.locx, message.locy);
-				//    			opp_soldiers[i].lookat(makepoint(message.lookx, message.looky));
-				//    			//opp_soldiers[i].draw();
+				//     var new_opp_tank = true;
+				//     for(var i in opp_tanks) {
+				//    		if (opp_tanks[i].id==message.id) {
+				//    			opp_tanks[i].loc = makepoint(message.locx, message.locy);
+				//    			opp_tanks[i].lookat(makepoint(message.lookx, message.looky));
+				//    			//opp_tanks[i].draw();
 				//    			if(message.func=="mu")
-				//    				opp_soldiers[i].moveup();
+				//    				opp_tanks[i].moveup();
 				//    			else if(message.func=="md")
-				//    				opp_soldiers[i].movedown();
+				//    				opp_tanks[i].movedown();
 				//    			else if(message.func=="nm")
-				//    				opp_soldiers[i].draw();
+				//    				opp_tanks[i].draw();
 
 
-				//    			new_opp_soldier = false;
-				//    			console.log('opp_soldier found, loc updated');
+				//    			new_opp_tank = false;
+				//    			console.log('opp_tank found, loc updated');
 				//    		} 	
 				//     }
 
-				//     if(new_opp_soldier) {
-				//     	opp_soldiers.push(makesoldier(ctx1, message.teamid, message.id, message.locx, message.locy, message.lookx, message.looky));	   
-				// 		// console.log('new opp_soldier added');
+				//     if(new_opp_tank) {
+				//     	opp_tanks.push(maketank(ctx1, message.teamid, message.id, message.locx, message.locy, message.lookx, message.looky));	   
+				// 		// console.log('new opp_tank added');
 				// 	}
 				// });
 
@@ -138,32 +139,32 @@ window.onkeydown = function(e){
 }
 
 function handleclick(pt){
-	var wassoldierselected = (ls!=0); 
-	var newsoldierselected = false;
-	for (var i in soldiers) {
-		//if we click on a soldier, try to select one
-		if(ptinrect(pt, soldiers[i].rect)) {
-			//if soldier was already selected, direct it to the last waypoint so it can start moving
+	var wastankselected = (ls!=0); 
+	var newtankselected = false;
+	for (var i in tanks) {
+		//if we click on a tank, try to select one
+		if(ptinrect(pt, tanks[i].rect)) {
+			//if tank was already selected, direct it to the last waypoint so it can start moving
 			// if(ls!=0) {
 			// 	if(ls.waypoint.length) {
 			// 		console.log('force look at the first waypoint');
 			// 		ls.lookat(ls.waypoint[0]);
 			// 	}
 			// }
-			ls = soldiers[i];
+			ls = tanks[i];
 			ls.waypoint = [];
-			newsoldierselected = true;
+			newtankselected = true;
 			break;
 		}
-		//if a soldier is selected, try hitting opposing teammates
-		else if(ls!=0 && ptinrect(pt,soldiers[i].rect) && ls.teamid!=soldiers[i].teamid) {
-			soldiers[i].hit(35);
+		//if a tank is selected, try hitting opposing teammates
+		else if(ls!=0 && ptinrect(pt,tanks[i].rect) && ls.teamid!=tanks[i].teamid) {
+			tanks[i].hit(35);
 			break;
 		}
 	}
 
-	//soldier was prev selected and user clicks on empty spot
-	if(wassoldierselected && !newsoldierselected) {
+	//tank was prev selected and user clicks on empty spot
+	if(wastankselected && !newtankselected) {
 		// console.log('waypoint added')
 		ls.waypoint.push(pt);
 		//ctx0.fillStyle="#FF0000";
@@ -190,7 +191,7 @@ function canvasmousemove(e){
 	if(ls==0)
 		return;
 
-	//calculate where the soldier is looking
+	//calculate where the tank is looking
 	ls.lookpt.x = e.layerX + 0.1*e.layerX; //90% css
 	ls.lookpt.y = e.layerY + 0.1*e.layerY;
 
@@ -220,13 +221,13 @@ function canvasdblclick(e){
 }
 
 function commandloop() {
-    for (var i in soldiers) {
-    	if(ls!=soldiers[i])
-    		soldiers[i].automove();
+    for (var i in tanks) {
+    	if(ls!=tanks[i])
+    		tanks[i].automove();
     } 
 
-    for (var i in opp_soldiers) {
-    	opp_soldiers[i].automove();
+    for (var i in opp_tanks) {
+    	opp_tanks[i].automove();
     }
 
 }
@@ -235,16 +236,16 @@ function commandloop() {
 // fb = new Firebase('http://gamma.firebase.com/Naiduv/' + gameid);
 
 
-var opp_soldiers = [];
+var opp_tanks = [];
 
 function randomloop()
 {
-	// console.log('zombiesoldier command');
-	livesoldiers = 0;
-	for (var i in soldiers) {
-		if(ls==soldiers[i] || !soldiers[i].alive)
+	// console.log('zombietank command');
+	livetanks = 0;
+	for (var i in tanks) {
+		if(ls==tanks[i] || !tanks[i].alive)
 			continue;
-		livesoldiers++;
+		livetanks++;
 		num = Math.floor(Math.random()*11);
 		switch(num)
 		{	
@@ -256,21 +257,21 @@ function randomloop()
 			case 5:
 			case 6:
 			case 7:
-				soldiers[i].moveup();
+				tanks[i].moveup();
 				break;
 			case 8:
-				soldiers[i].fire();
+				tanks[i].fire();
 				break;
 			case 9:
-				soldiers[i].lookangle += 20;
+				tanks[i].lookangle += 20;
 				break;	
 			case 10:
-				soldiers[i].lookangle -= 20;
+				tanks[i].lookangle -= 20;
 				break;
 		}
 	}
 
-	if(livesoldiers<=0) {
+	if(livetanks<=0) {
 		stop_running = true;
 		document.location.reload(true);
 	}
@@ -291,12 +292,12 @@ function initcanvas(){
 
 //initialize the units
 function initsquad() {
-	while(soldier_count<num_soldiers) {
-		//ls = new soldier(100+Math.floor(Math.random()*(canvas_w-200)),100+Math.floor(Math.random()*(canvas_h-200)));
-		ls = new soldier((soldier_count*50)+50, (soldier_count)+canvas_h-50);
+	while(tank_count<num_tanks) {
+		//ls = new tank(100+Math.floor(Math.random()*(canvas_w-200)),100+Math.floor(Math.random()*(canvas_h-200)));
+		ls = new tank((tank_count*50)+50, (tank_count)+canvas_h-50);
 		ls.draw();
-		soldiers.push(ls);
-		soldier_count++;
+		tanks.push(ls);
+		tank_count++;
 	}
 }
 
