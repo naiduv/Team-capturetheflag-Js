@@ -231,51 +231,29 @@ function canvasdblclick(e){
 }
 
 function commandloop() {
-	livesoldiers = 0;
-	for (var i in soldiers) {
-		if(ls==soldiers[i] || !soldiers[i].alive)
-			continue;
-		livesoldiers++;
+    for (var i in soldiers) {
+	if(ls==soldiers[i] || !soldiers[i].alive)
+	    continue;
+	if(soldiers[i].waypoint.length) { 
+	    //look at the wayoint and make a move up to it
+	    soldiers[i].lookat(soldiers[i].waypoint[0]);
+	    soldiers[i].moveup();
+	    //when we get to a waypoint
+	    if(ptinrect(soldiers[i].waypoint[0], soldiers[i].rect)) {
+		//remove the waypoint
+		soldiers[i].waypoint.shift();
+		//point the soldier in the new waypoint dir, if it exists
 		if(soldiers[i].waypoint.length) {
-			soldiers[i].lookat(soldiers[i].waypoint[0]);
-			soldiers[i].moveup();
-			soldiers[i].loc.x= round(soldiers[i].loc.x);
-			soldiers[i].loc.y= round(soldiers[i].loc.y);
-			soldiers[i].lookx= round(soldiers[i].lookx);
-			soldiers[i].looky= round(soldiers[i].looky);
-			if(Socket) {
-				var message= '{"fc":'+"'mu'"+',"gid":'+gameid+',"tid":'+teamid+ ',"pid":'+soldiers[i].id +',"px":'+soldiers[i].loc.x +',"py":'+soldiers[i].loc.y+ ',"lx":'+soldiers[i].lookpt.x +',"ly":'+soldiers[i].lookpt.y+'}';
-				if(message.length>35 && message.length<115){
-					//console.log(message);
-					Socket.send(message);
-				}
-			}
-			//fbgameref.push({func:"mu", teamid:teamid, id:soldiers[i].id, locx:soldiers[i].loc.x, locy:soldiers[i].loc.y, lookx:soldiers[i].lookpt.x, looky:soldiers[i].lookpt.y});
-			//when we get to a waypoint
-			if(ptinrect(soldiers[i].waypoint[0], soldiers[i].rect)) {				// console.log('hit waypoint');
-				//ctx0.clearRect(soldiers[i].waypoint.x, soldiers[i].waypoint.y,5,5);
-				//remove the waypoint
-				soldiers[i].waypoint.shift();
-				//point the soldier in the new waypoint dir, if it exists
-				if(soldiers[i].waypoint.length) {
-					//look at next waypoint
-					// console.log('look at next waypoint');
-					soldiers[i].lookat(soldiers[i].waypoint[0]);
-				}
-			}
-		} else {
-			//if no commands just look around so that we are not cleaned out
-			soldiers[i].lookat(makepoint(soldiers[i].lookpt.x+myrand(1), soldiers[i].lookpt.y+myrand(1)));
-			//fbgameref.push({func:"nm", teamid:teamid, id:soldiers[i].id, locx:soldiers[i].loc.x, locy:soldiers[i].loc.y, lookx:soldiers[i].lookpt.x, looky:soldiers[i].lookpt.y});
-			soldiers[i].draw();
-			// console.log('looking around' + Math.random()*1000);
+		    //look at next waypoint
+		    soldiers[i].lookat(soldiers[i].waypoint[0]);
 		}
+	    }
+	} else {
+	    //if no commands just look around so that we are not cleaned out
+	    soldiers[i].lookat(makepoint(soldiers[i].lookpt.x+myrand(1), soldiers[i].lookpt.y+myrand(1)));
+	    soldiers[i].draw();
 	}
-
-	if(livesoldiers<=0) {
-		stop_running = true;
-		document.location.reload(true);
-	}
+    }
 }
 
 //fb is changed after the gameid is entered!!!!! check onkeypress 13 (enter)
