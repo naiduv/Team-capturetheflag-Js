@@ -1,12 +1,12 @@
 
-tank = function(ctx, x, y){
+tank = function(ctx, ctxb, x, y){
 	this.selected = false;
 	this.id = Math.floor(Math.random()*10000);
 	this.teamid = teamid;
 	this.lookpt = makepoint(myrand(100),myrand(100));
 	this.lookangle = 0;
-	this.w = 29;
-	this.h = 35;
+	this.w = 25;
+	this.h = 29;
 	//this.element = elem;
 	this.loc = new Point(x,y);
 	this.collrect = new Rect(this.loc.x-this.w/2-increment*2,this.loc.y-this.h/2-increment*2,this.w+(4*increment),this.h+(4*increment));
@@ -16,6 +16,7 @@ tank = function(ctx, x, y){
 						"tank_walking_2",
 						"tank_walking_3"];
 	this.ctx = ctx;
+	this.ctxb = ctxb;
 	this.firing = false;
 	this.ammo = 100;
 	this.health = 100;
@@ -27,6 +28,20 @@ tank = function(ctx, x, y){
 }
 
 tank.prototype = {
+	select: function(){
+		if(this.selected)
+			return;
+		this.selected = true;
+	},
+
+	deselect: function(){
+		if(!this.selected)
+			return;
+		this.selected = false;
+		//we need to redraw, in order to clear the selection circle
+		this.draw();
+	},
+
 	draw : function(movetank){
 		if(!this.ctx)
 			alert('error tank.draw()');
@@ -47,6 +62,28 @@ tank.prototype = {
     		this.ctx.drawImage(document.getElementById("bleeding"),0,0,this.w/1,this.h/1);
 
 		this.ctx.restore();
+
+		//ctxb NOT ctx
+		this.rect.clear(this.ctxb);
+		this.drawselectionmarker();
+		this.drawhealth();
+	},
+
+	drawselectionmarker: function(){
+		if(this.selected){
+			this.ctxb.beginPath();
+			this.ctxb.arc(this.loc.x,this.loc.y,this.w/2,0,2*Math.PI, true);
+			this.ctxb.fillStyle = "rgba(0, 255, 0, 0.2)";
+			this.ctxb.fill();
+		}
+	},
+
+	drawhealth: function() {
+		this.ctxb.beginPath();
+		this.ctxb.arc(this.loc.x,this.loc.y,this.w/2+1,0,2*Math.PI, true);
+		this.ctxb.lineWidth = 2;
+		this.ctxb.strokeStyle = 'green';
+		this.ctxb.stroke();
 	},
 
 	walkingimage: function(movetank){
@@ -62,7 +99,7 @@ tank.prototype = {
 		this.loc.x += increment*Math.sin(this.lookangle*Math.PI/180);
 		this.loc.y -= increment*Math.cos(this.lookangle*Math.PI/180);
     	this.rect = makerect(this.loc.x-this.w/2-increment*2,this.loc.y-this.h/2-increment*2,this.w+(4*increment),this.h+(4*increment));  	
-		this.collrect = makerect(this.loc.x-this.w/2-increment,this.loc.y-this.h/2-increment,this.w+increment*2,this.h+increment*2);
+		// this.collrect = makerect(this.loc.x-this.w/2-increment*2,this.loc.y-this.h/2-increment,this.w+increment*4,this.h+increment*4);
 
 		// if(Socket) {
 		// 	var message= '{"fc":'+"'mu'"+',"gid":'+gameid+',"tid":'+this.teamid+ ',"pid":'+this.id +',"px":'+round(this.loc.x) +',"py":'+round(this.loc.y)+ ',"lx":'+round(this.lookpt.x) +',"ly":'+round(this.lookpt.y)+'}';
@@ -78,7 +115,7 @@ tank.prototype = {
     	//forcing it down if it collides with another rect
 		if(!force) {
     		for (var i in tanks) {
-    			if(this.id!=tanks[i].id && tanks[i].alive && rectscollide(this.collrect, tanks[i].collrect)) {
+    			if(this.id!=tanks[i].id && tanks[i].alive && rectscollide(this.rect, tanks[i].rect)) {
 					this.movedown(true);
     				return;
     			}
@@ -136,11 +173,12 @@ tank.prototype = {
 			   		this.lookat(this.waypoint[0]);
 				}
 			}
-		} else {
-		    //if no commands just look around so that we are not cleaned out
-		    this.lookat(makepoint(this.lookpt.x+myrand(1)*0.5, this.lookpt.y+myrand(1)*0.5));
-		    this.draw();
 		}
+		// } else {
+		//     //if no commands just look around so that we are not cleaned out
+		//     this.lookat(makepoint(this.lookpt.x+myrand(1)*0.5, this.lookpt.y+myrand(1)*0.5));
+		//     this.draw();
+		// }
 
 	},
 
@@ -186,8 +224,8 @@ tank.prototype = {
 
 }
 
-function maketank(ctx, teamid, id,x,y,lookx,looky) {
-	s = new tank(x,y);
+function maketank(ctx, ctxb, teamid, id,x,y,lookx,looky) {
+	s = new tank(ctx, ctxb, x, y);
 	s.teamid = teamid;
 	s.id = id;
 	s.lookpt = makepoint(lookx, looky);

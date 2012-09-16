@@ -11,6 +11,8 @@ var stop_running = false;
 var ctx0;
 var ctx1;
 var ctx2;
+var ctx3;
+
 var tank_count = 0;
 var timer;
 var ammo = 0;
@@ -102,40 +104,6 @@ window.onkeydown = function(e){
 					console.log('conn error');
 				};
 
-
-				//fbgameref = fb.child(gameid);
-
-				// fbgameref.on('child_added', function (snapshot) {
-				//     var message = snapshot.val();
-				//     // console.log('child_added');
-				//     if(message.teamid==teamid)
-				//     	return;
-
-				//     var new_opp_tank = true;
-				//     for(var i in opp_tanks) {
-				//    		if (opp_tanks[i].id==message.id) {
-				//    			opp_tanks[i].loc = makepoint(message.locx, message.locy);
-				//    			opp_tanks[i].lookat(makepoint(message.lookx, message.looky));
-				//    			//opp_tanks[i].draw();
-				//    			if(message.func=="mu")
-				//    				opp_tanks[i].moveup();
-				//    			else if(message.func=="md")
-				//    				opp_tanks[i].movedown();
-				//    			else if(message.func=="nm")
-				//    				opp_tanks[i].draw();
-
-
-				//    			new_opp_tank = false;
-				//    			console.log('opp_tank found, loc updated');
-				//    		} 	
-				//     }
-
-				//     if(new_opp_tank) {
-				//     	opp_tanks.push(maketank(ctx1, message.teamid, message.id, message.locx, message.locy, message.lookx, message.looky));	   
-				// 		// console.log('new opp_tank added');
-				// 	}
-				// });
-
 				//START RUNNING THE PROGRAM
 				start();
 			}
@@ -150,13 +118,9 @@ function handleclick(pt){
 		//if we click on a tank, try to select one
 		if(ptinrect(pt, tanks[i].rect)) {
 			//if tank was already selected, direct it to the last waypoint so it can start moving
-			// if(ls!=0) {
-			// 	if(ls.waypoint.length) {
-			// 		console.log('force look at the first waypoint');
-			// 		ls.lookat(ls.waypoint[0]);
-			// 	}
-			// }
+			if(ls) ls.deselect();
 			ls = tanks[i];
+			ls.select();
 			ls.waypoint = [];
 			newtankselected = true;
 			break;
@@ -209,7 +173,8 @@ function canvasdblclick(e){
 		return;
 
 	// console.log('dblclick');
-	ls = 0;
+	ls.deselect();
+	ls=0;
 }
 
 function commandloop() {
@@ -281,7 +246,7 @@ function randomloop()
 }
 
 function initcanvas(){
-	var c = document.getElementById("canvas-o");
+	var c = document.getElementById("canvas-0");
  	ctx0 = c.getContext("2d");
   	canvas_w = ctx0.canvas.width  = window.innerWidth;
   	canvas_h = ctx0.canvas.height = window.innerHeight;
@@ -289,11 +254,14 @@ function initcanvas(){
 	c.addEventListener('mouseup', canvasmouseup);
 	c.addEventListener('dblclick', canvasdblclick);
 
-	c = document.getElementById("canvas-i");
+	c = document.getElementById("canvas-1");
 	ctx1 = c.getContext("2d");
 
-	c = document.getElementById("canvas-z");
+	c = document.getElementById("canvas-2");
 	ctx2 = c.getContext("2d");
+
+	c = document.getElementById("canvas-3");
+	ctx3 = c.getContext("2d");
 
 	resizecanvas();
 }
@@ -305,20 +273,25 @@ window.onresize = function()
 }
 
 function resizecanvas(){
-	var c = document.getElementById("canvas-o");
+	var c = document.getElementById("canvas-0");
 	ctx0 = c.getContext("2d");
 	ctx0.canvas.width  = window.innerWidth;
 	ctx0.canvas.height = window.innerHeight;
 
-	c = document.getElementById("canvas-i");
+	c = document.getElementById("canvas-1");
 	ctx1 = c.getContext("2d");
 	ctx1.canvas.width  = window.innerWidth;
 	ctx1.canvas.height = window.innerHeight;
 
-	c = document.getElementById("canvas-z");
+	c = document.getElementById("canvas-2");
 	ctx2 = c.getContext("2d");
 	ctx2.canvas.width  = window.innerWidth;
 	ctx2.canvas.height = window.innerHeight;
+
+	c = document.getElementById("canvas-3");
+	ctx3 = c.getContext("2d");
+	ctx3.canvas.width  = window.innerWidth;
+	ctx3.canvas.height = window.innerHeight;
 }
 
 //initialize the units
@@ -327,10 +300,12 @@ function initsquad() {
 	var y = myurand(window.innerHeight) 
 	while(tank_count<num_tanks) {
 		//ls = new tank(100+Math.floor(Math.random()*(canvas_w-200)),100+Math.floor(Math.random()*(canvas_h-200)));
-		ls = new tank(ctx0, (tank_count*50)+x, (tank_count)+y);
+		if(ls) ls.deselect();
+		ls = new tank(ctx0, ctx3, (tank_count*70)+x, (tank_count)+y);
 		ls.draw();
 		tanks.push(ls);
 		tank_count++;
+		ls.select();
 	}
 }
 
@@ -366,5 +341,3 @@ window.onload = function() {
 
 	//fb = new Firebase('http://gamma.firebase.com/Naiduv/');
 }
-
-

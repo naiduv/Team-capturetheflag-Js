@@ -21,7 +21,7 @@ canvas{
 	background-color:;*/
 }
 
-/*#top-canvas{
+/*#canvas-3{
 	background:url(./images/maps/map.png);
 }*/
 
@@ -76,9 +76,10 @@ body
 					</div>
 
 <!-- REMEMBER Z ORDER MATTER HERE, ALSO THE TOP ONE GETS THE MOUSE COMMANDS!!! -->
-<center><canvas id="canvas-z" style="z-index: 0"></canvas></center>
-<center><canvas id="canvas-i" style="z-index: 1"></canvas></center>
-<center><canvas id="canvas-o" style="z-index: 2"></canvas></center>
+<center><canvas id="canvas-3" style="z-index: -1"></canvas></center>
+<center><canvas id="canvas-2" style="z-index: 0"></canvas></center>
+<center><canvas id="canvas-1" style="z-index: 1"></canvas></center>
+<center><canvas id="canvas-0" style="z-index: 2"></canvas></center>
 
 <form id="gameidform" class="formfont" onSubmit="return false;">
 CHOOSE A UNIQUE GAME ID    <input type="text" class="inputform" id="gameid"></input><br />
