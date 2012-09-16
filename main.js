@@ -136,6 +136,16 @@ function handleclick(pt){
 	if(wastankselected && !newtankselected) {
 		// console.log('waypoint added')
 		ls.waypoint.push(pt);
+		// if(ls.waypoint.length == 1) {
+		// 	ctx3.moveTo(ls.loc.x, ls.loc.y);
+		// 	ctx3.lineTo(pt.x, pt.y);
+		// 	ctx3.stroke();
+		// } else {
+		// 	var last = ls.waypoint.length;
+		// 	ctx3.moveTo(ls.waypoint[last-2].x, ls.waypoint[last-2].y);
+		// 	ctx3.lineTo(ls.waypoint[last-1].x, ls.waypoint[last-1].y);
+		// 	ctx3.stroke();
+		// }
 		//ctx0.fillStyle="#FF0000";
 		//ls = 0;
 	}

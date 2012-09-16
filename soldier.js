@@ -117,6 +117,7 @@ tank.prototype = {
     		for (var i in tanks) {
     			if(this.id!=tanks[i].id && tanks[i].alive && rectscollide(this.rect, tanks[i].rect)) {
 					this.movedown(true);
+    				this.goaround();
     				return;
     			}
     		}
@@ -133,13 +134,20 @@ tank.prototype = {
 		//forcing it up if it collides with another rect
 		if(!force) {
     		for (var i in tanks) {
-    			if(this.id!=tanks[i].id && rectscollide(this.collrect, tanks[i].collrect)) {
-    				this.moveup(true);
+    			if(this.id!=tanks[i].id && rectscollide(this.rect, tanks[i].rect)) {
+    				this.goaround();
+    				//this.moveup(true);
     				return;
     			}
     		}
     	}
 		this.draw(true);
+	},
+
+	goaround: function(){
+		console.log('trying to go around');
+		this.lookangle +=5;
+		this.moveup();
 	},
 
 	fire: function(){
