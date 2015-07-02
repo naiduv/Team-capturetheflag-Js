@@ -6,8 +6,6 @@ var num_tanks = 3;
 var canvas_w;
 var canvas_h;
 var stop_running = false;
-// var fb;
-// var fbgameref;
 var ctx0;
 var ctx1;
 var ctx2;
@@ -36,14 +34,11 @@ window.onkeydown = function(e){
 		case 87:
 			return;
 			if(!started) return;
-			//fbgameref.push({func:"mu", teamid:teamid, id:ls.id, locx:ls.loc.x, locy:ls.loc.y, lookx:ls.lookpt.x, looky:ls.lookpt.y});
-			//if(Socket) Socket.send('{"fc":'+"'mu'"+',"gid":'+gameid+',"tid":'+teamid+ ',"pid":'+ls.id +',"px":'+ls.loc.x +',"py":'+ls.loc.y+ ',"lx":'+ls.lookpt.x +',"ly":'+ls.lookpt.y+'}');
 			ls.moveup();
 			break;
 		case 83:
 			return;
-			//if(!started) return;
-			//if(Socket) Socket.send('{"fc":'+"'md'"+',"gid":'+gameid+',"tid":'+teamid+ ',"pid":'+ls.id +',"px":'+ls.loc.x +',"py":'+ls.loc.y+ ',"lx":'+ls.lookpt.x +',"ly":'+ls.lookpt.y+'}');
+
 			//ls.movedown();
 			break;
 		case 13:
@@ -55,7 +50,7 @@ window.onkeydown = function(e){
 				//gameidform.hidden = true;
 				gameidform.innerText = "YOUR GAMEID IS " + gameid + ". INVITE FRIENDS TO JOIN!";
 
-				Socket = new WebSocket("ws://192.168.0.191:5001");
+				Socket = new WebSocket("ws://127.0.0.1:8181");
 				//Socket = new WebSocket("ws://www.mailerdemon.com:5001");
 				//Socket = new WebSocket("ws://10.0.2.15:5001");
 
@@ -66,7 +61,6 @@ window.onkeydown = function(e){
   					console.log('Server: ' + e.data);
   					eval("smx1="+e.data);
   					var message = smx1;
-				    // console.log('child_added');
 				    if(message.tid==teamid)
 				    	return;
 
@@ -210,9 +204,6 @@ function initflag() {
 	flags[0].draw();
 }
 
-//fb is changed after the gameid is entered!!!!! check onkeypress 13 (enter)
-// fb = new Firebase('http://gamma.firebase.com/Naiduv/' + gameid);
-
 
 var opp_tanks = [];
 
@@ -326,7 +317,56 @@ function mainloop(){
 			flagloop();
 			//randomloop();
 	}, 70);
+    
+    self.setInterval(function(){
+		if(!stop_running)
+            serverNotifyLoop();
+	}, 200);
 }
+
+
+serverModel = function(tank){
+	//this.selected = false;
+    this.gameid = gameid;
+	this.tankid = tank.id;
+	this.teamid = tank.teamid;
+	this.lookpt = tank.lookpt;
+	this.lookangle = tank.lookangle;
+	//this.element = elem;
+	this.loc = tank.loc;
+//	this.collrect = new Rect(this.loc.x-this.w/2-increment*2,this.loc.y-this.h/2-increment*2,this.w+(4*increment),this.h+(4*increment));
+//	this.rect = new Rect(this.loc.x-this.w/2-increment*2,this.loc.y-this.h/2-increment*2,this.w+(4*increment),this.h+(4*increment));
+//	this.ywalkloc = 1;
+//	this.ywalkcycle = [	"tank_walking_1", 
+//						"tank_walking_2",
+//						"tank_walking_3"];
+//	this.ctx = ctx;
+//	this.ctxb = ctxb;
+	this.firing = tank.firing;
+//	this.ammo = 100;
+	this.health = tank.health;
+	this.alive = tank.alive;
+//	this.bleeding = false;
+//	this.waypoint = [];
+//	this.sendcount = 0;
+
+}
+
+//server notifier, asks the different game objects where they are 
+//and notifies the server
+function serverNotifyLoop(){   
+    if(!Socket)
+        return;
+    
+    for (i = 0; i < tanks.length; i++) {
+        if(!tanks[i].alive)
+            continue;
+        else
+            Socket.send(JSON.stringify(new serverModel(tanks[i])));
+    }
+    
+}
+
 
 //THIS IS THE MAIN FUNCTION
 var started = false;
@@ -336,6 +376,8 @@ function start(){
 	//unhide the instructions
 	instructions_element_id.hidden = false;
 
+    //check if the socket exists and ha
+    
 	//init the canvas, squad and start ai
 	initcanvas();
 	initflag();
@@ -349,5 +391,4 @@ window.onload = function() {
 	instructions_element_id = document.getElementById('inctructions');
 	instructions_element_id.hidden = true;
 
-	//fb = new Firebase('http://gamma.firebase.com/Naiduv/');
 }

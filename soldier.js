@@ -96,6 +96,7 @@ tank.prototype = {
 	},
 
 	moveup : function(force){
+        
 		this.loc.x += increment*Math.sin(this.lookangle*Math.PI/180);
 		this.loc.y -= increment*Math.cos(this.lookangle*Math.PI/180);
     	this.rect = makerect(this.loc.x-this.w/2-increment*2,this.loc.y-this.h/2-increment*2,this.w+(4*increment),this.h+(4*increment));  	
@@ -145,7 +146,7 @@ tank.prototype = {
 	},
 
 	goaround: function(){
-		console.log('trying to go around');
+//		console.log('trying to go around');
 		this.lookangle +=5;
 		this.moveup();
 	},
@@ -229,6 +230,8 @@ tank.prototype = {
 		if (this.lookangle < 0) this.lookangle += 360;
 		this.lookangle -=90;
 	}
+    
+    
 
 }
 
